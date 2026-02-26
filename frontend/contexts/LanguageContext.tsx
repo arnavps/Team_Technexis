@@ -4,8 +4,12 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { en } from "../translations/en";
 import { hi } from "../translations/hi";
 import { mr } from "../translations/mr";
+import { te } from "../translations/te";
+import { ta } from "../translations/ta";
+import { gu } from "../translations/gu";
+import { pa } from "../translations/pa";
 
-type Language = "en" | "hi" | "mr";
+type Language = "en" | "hi" | "mr" | "te" | "ta" | "gu" | "pa";
 type Translations = typeof en;
 
 interface LanguageContextType {
@@ -19,7 +23,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const dictionaries = {
     en,
     hi,
-    mr
+    mr,
+    te,
+    ta,
+    gu,
+    pa
 };
 
 export function LanguageProvider({ children }: { children: ReactNode }) {

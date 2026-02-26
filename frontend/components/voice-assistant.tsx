@@ -23,7 +23,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
     // Web Speech API references
     const recognitionRef = useRef<any>(null);
-    const synthRef = useRef<SpeechSynthesis | null>(null);
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
         if (initialQuery && !isThinking) {
@@ -94,10 +94,15 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     };
 
     useEffect(() => {
-        if (typeof window !== "undefined" && "speechSynthesis" in window) {
-            synthRef.current = window.speechSynthesis;
-        }
         initRecognition();
+
+        // Cleanup audio on unmount
+        return () => {
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.src = "";
+            }
+        };
     }, [language]);
 
     const toggleListen = () => {
@@ -107,59 +112,54 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         } else {
             setTranscript("");
             setResponse("");
-            if (synthRef.current) synthRef.current.cancel();
+            if (audioRef.current) {
+                audioRef.current.pause();
+                audioRef.current.currentTime = 0;
+            }
             recognitionRef.current?.start();
             setIsListening(true);
         }
     };
 
-    const [lastVoiceName, setLastVoiceName] = useState<string>("");
+    const [lastVoiceName, setLastVoiceName] = useState<string>("MittiMitra TTS Engine");
 
-    const speakResponse = (text: string) => {
-        if (!synthRef.current) return;
+    const speakResponse = async (text: string) => {
+        if (!text) return;
 
-        synthRef.current.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-
-        const voices = synthRef.current.getVoices();
-        let langCode = "hi-IN";
-        if (language === "Marathi") langCode = "mr-IN";
-        if (language === "English") langCode = "en-IN"; // Prefer Indian English for context
-
-        // Strategy: Look for Google/Neural voices first as they are MUCH better
-        const getBestVoice = (code: string) => {
-            const matches = voices.filter(v => v.lang.includes(code) || v.lang.includes(code.split('-')[0]));
-            return matches.find(v => v.name.includes("Google") || v.name.includes("Neural")) || matches[0];
-        };
-
-        let voice = getBestVoice(langCode);
-
-        // Fallback: If no Indian English, try US English
-        if (!voice && language === "English") {
-            voice = getBestVoice("en-US");
+        if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
         }
 
-        // Fallback for Marathi: If no Marathi voice, use Hindi Google voice
-        if (!voice && language === "Marathi") {
-            voice = getBestVoice("hi-IN");
-        }
+        try {
+            const backendUrl = `http://${window.location.hostname}:8000/chat/tts`;
+            const res = await fetch(backendUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    text: text,
+                    language: language
+                })
+            });
 
-        if (voice) {
-            utterance.voice = voice;
-            setLastVoiceName(voice.name);
-        }
+            if (res.ok) {
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audioRef.current = audio;
 
-        // Custom rates per language confirmed by user feedback
-        if (language === "Marathi") {
-            utterance.rate = 0.85; // Slow Marathi is clear
-        } else if (language === "Hindi") {
-            utterance.rate = 0.90; // Balanced Hindi rate
-        } else {
-            utterance.rate = 0.95; // English natural rate
-        }
+                audio.onended = () => {
+                    URL.revokeObjectURL(url);
+                };
 
-        utterance.pitch = 1.0;
-        synthRef.current.speak(utterance);
+                await audio.play();
+                setLastVoiceName(`MittiMitra Cloud Voice (${language})`);
+            } else {
+                console.error("Failed to generate TTS audio.");
+            }
+        } catch (err) {
+            console.error("Error playing audio response", err);
+        }
     };
 
     const handleAskVakeel = async (query: string) => {
@@ -216,19 +216,22 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                     <p className="text-sm text-gray-400">Ask why you should sell or wait</p>
                 </div>
                 {!isEmbedded && (
-                    <button onClick={() => { setIsOpen(false); synthRef.current?.cancel(); }} className="text-gray-400 hover:text-white p-2">
+                    <button onClick={() => {
+                        setIsOpen(false);
+                        if (audioRef.current) audioRef.current.pause();
+                    }} className="text-gray-400 hover:text-white p-2">
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                 )}
             </div>
 
             {/* Language Selection */}
-            <div className="flex space-x-2 mb-6">
-                {['English', 'Hindi', 'Marathi'].map((lang) => (
+            <div className="flex flex-wrap gap-2 mb-6">
+                {['English', 'Hindi', 'Marathi', 'Telugu', 'Tamil', 'Gujarati', 'Punjabi'].map((lang) => (
                     <button
                         key={lang}
                         onClick={() => setLanguage(lang)}
-                        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${language === lang
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${language === lang
                             ? 'bg-mint text-forest'
                             : 'bg-glass-bg border border-glass-border text-gray-300 hover:bg-white/5'
                             }`}

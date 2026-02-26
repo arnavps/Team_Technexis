@@ -1,16 +1,35 @@
 import random
 from typing import Dict, Any, List
 
-def fetch_mandi_prices(crop: str, location: dict) -> Dict[str, Any]:
+def fetch_mandi_prices(crop: str, location: dict, language: str = "en") -> Dict[str, Any]:
     """
     Simulates fetching real-time Mandi price and volume data from Agmarknet/e-NAM APIs.
     Returns current price, rolling 7-day average, historical prices, and current volume.
     """
+    # Regional Staple Fallbacks based on language context if crop is not specified
+    if not crop or crop.lower() in ["tomato", "default", ""]:
+        lang_defaults = {
+            "te": "Cotton",
+            "ta": "Rice",
+            "gu": "Groundnut",
+            "pa": "Wheat",
+            "mr": "Sugarcane",
+            "hi": "Mustard",
+            "en": "Tomato"
+        }
+        crop = lang_defaults.get(language, "Tomato")
+
     # Mocking standard price ranges based on crop
     base_prices = {
         "tomato": 25.0,
         "onion": 30.0,
-        "potato": 20.0
+        "potato": 20.0,
+        "cotton": 70.0,
+        "rice": 40.0,
+        "groundnut": 60.0,
+        "wheat": 35.0,
+        "sugarcane": 30.0,
+        "mustard": 50.0
     }
     
     base_price = base_prices.get(crop.lower(), 25.0)

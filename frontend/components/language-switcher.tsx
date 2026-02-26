@@ -12,6 +12,10 @@ export function LanguageSwitcher() {
         { code: "en", label: "English" },
         { code: "hi", label: "हिंदी" },
         { code: "mr", label: "मराठी" },
+        { code: "te", label: "తెలుగు" },
+        { code: "ta", label: "தமிழ்" },
+        { code: "gu", label: "ગુજરાતી" },
+        { code: "pa", label: "ਪੰਜਾਬੀ" },
     ];
 
     const currentLabel = languages.find(l => l.code === language)?.label || "English";
@@ -45,7 +49,7 @@ export function LanguageSwitcher() {
                         <button
                             key={lang.code}
                             onClick={() => {
-                                setLanguage(lang.code as "en" | "hi" | "mr");
+                                setLanguage(lang.code as "en" | "hi" | "mr" | "te" | "ta" | "gu" | "pa");
                                 setIsOpen(false);
                             }}
                             className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 ${language === lang.code ? "text-mint font-bold bg-white/5" : "text-gray-300"

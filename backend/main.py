@@ -27,10 +27,11 @@ app.include_router(chat_router, prefix="/chat", tags=["AI Explanation"])
 app.include_router(user_router, prefix="/user", tags=["User Data Management"])
 
 class HarvestRequest(BaseModel):
-    crop: str
+    crop: str = ""
     location: dict
     yield_est_quintals: float
     base_spoilage_rate: float = 0.05 # 5% base spoilage
+    language: str = "en"
 
 @app.get("/health")
 def health_check():
@@ -47,7 +48,7 @@ def get_harvest_recommendation(data: HarvestRequest):
     try:
         # 1. Fetch Integration Data
         weather_data = fetch_district_weather(data.location)
-        mandi_response = fetch_mandi_prices(data.crop, data.location)
+        mandi_response = fetch_mandi_prices(data.crop, data.location, data.language)
         primary_mandi = mandi_response["primary"]
         regional_mandis = mandi_response["regional_options"]
         

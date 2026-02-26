@@ -1,9 +1,12 @@
 import os
+import io
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, Any, List
 from groq import Groq
 from dotenv import load_dotenv
+from gtts import gTTS
 
 load_dotenv()
 
@@ -19,6 +22,10 @@ class ChatRequest(BaseModel):
     dashboard_context: Dict[str, Any]
     language: str = "Regional"
 
+class TTSRequest(BaseModel):
+    text: str
+    language: str = "English"
+
 def build_system_prompt(context: Dict[str, Any], language: str) -> str:
     """
     Injects the real-time dashboard data (prices, weather, shocks) into the AI prompt.
@@ -32,10 +39,10 @@ def build_system_prompt(context: Dict[str, Any], language: str) -> str:
     
     prompt = f"""You are the MittiMitra Agri-Vakeel, an expert, empathetic agricultural advisor for Indian farmers.
 You MUST respond ONLY in the following language: {language}.
-If the language is Hindi or Marathi:
-1. You MUST use Devanagari script (देवनागरी).
-2. DO NOT use Roman script (English letters) for words.
-3. You MUST write out all numbers in words (e.g., instead of '15000' write 'पंद्रह हजार'). This is critical for voice clarity.
+If the language is Hindi or Marathi or Telugu or Tamil or Gujarati or Punjabi:
+1. You MUST use the native script of {language} (e.g. Devanagari, Telugu script, Tamil script, etc.).
+2. DO NOT use Roman script (English letters) for words in the response.
+3. You MUST write out all numbers in words in {language} (e.g., instead of '15000' write the words for fifteen thousand in {language}). This is critical for voice clarity.
 
 If the language is Hindi, use simple, respectful, and grounding Hindi. 
 Address the farmer as 'Ji Kisan Bhai' (जी किसान भाई).
@@ -46,19 +53,17 @@ Language specific Rule for Hindi:
 If the language is Marathi, use very simple, slow-paced Marathi that a farmer can easily understand.
 Address the farmer as 'Namaskar Shetkari Mitra' (नमस्कार शेतकरी मित्र).
 
-Language specific Rule for Marathi:
-- Use terms like 'Vikri kara' (विक्री करा) for Sell.
-- Use 'Thamba' (थांबा) for Wait/Hold.
-- Keep sentences short and use common village-level Marathi words.
+If the language is Telugu, address the farmer as 'Namaskaram Raithu Sodhara' in Telugu script.
+If the language is Tamil, address the farmer as 'Vanakkam Vivasayi Nanbare' in Tamil script.
+If the language is Gujarati, address the farmer as 'Namaskar Khedut Mitra' in Gujarati script.
+If the language is Punjabi, address the farmer as 'Sat Sri Akal Kisan Veer' in Punjabi script.
+
+Translate technical terms into locally understood farming analogies. For example, "Biological Clock" should be explained as "Crop Expiry / Fasal ka samay" or equivalent in {language}. Keep the analogy native and intuitive.
 
 If the language is English:
 - Use clear, professional, yet empathetic Indian English.
 - Address the farmer as 'Farmer Friend' or 'Sir'.
 - Keep sentences concise and focus on the profit impact.
-
-High-Quality Hindi Example: 'जी किसान भाई. पुणे मंडी में दाम अभी अच्छे हैं. अगर आप आज ही अपनी फसल पंद्रह हजार के मुनाफे पर बेचते हैं, तो यह सही होगा.'
-High-Quality Marathi Example: 'नमस्कार शेतकरी मित्र. पुणे बाजारात सध्या दर चांगले आहेत. तुम्ही आजच माल विक्रीसाठी काढल्यास तुम्हाला जास्त नफा मिळेल.'
-High-Quality English Example: 'Farmer friend, the current market price in Pune is high. We recommend selling today to secure a profit of fifteen thousand rupees.'
 
 Here is the CURRENT REAL-TIME DATA for the farmer:
 - Overall Recommendation Status: {status} (GREEN=Sell, YELLOW=Hold, RED=Wait/Danger)
@@ -79,7 +84,6 @@ Here is the CURRENT REAL-TIME DATA for the farmer:
 YOUR TASK:
 Explain the 'Sell vs Wait' recommendation to the farmer based ONLY on the data above.
 Do not just repeat the numbers. Explain the TRADE-OFFS.
-Example: 'Ji, although the local Mandi price is ₹20, waiting 2 days for the Latur market (₹25) is worth it because the rain risk is low and your transport cost is only ₹1.'
 Keep the response UNDER 3 sentences and highly actionable. Be empathetic and build trust.
 """
     return prompt
@@ -112,5 +116,37 @@ def chat_explain(req: ChatRequest):
         reply = completion.choices[0].message.content
         return {"response": reply}
         
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/tts")
+def text_to_speech(req: TTSRequest):
+    """
+    Sub-second endpoint to generate robust audio for all 7 Indic languages via gTTS.
+    """
+    try:
+        lang_map = {
+            "English": "en",
+            "Hindi": "hi",
+            "Marathi": "mr",
+            "Telugu": "te",
+            "Tamil": "ta",
+            "Gujarati": "gu",
+            "Punjabi": "pa"
+        }
+        
+        target_lang = lang_map.get(req.language, "en")
+        
+        # Slow down Marathi audio for clarity based on farmer feedback
+        is_slow = req.language == "Marathi"
+        
+        tts = gTTS(text=req.text, lang=target_lang, slow=is_slow)
+        
+        mp3_fp = io.BytesIO()
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.seek(0)
+        
+        return StreamingResponse(mp3_fp, media_type="audio/mpeg")
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

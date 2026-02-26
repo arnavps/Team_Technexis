@@ -1,0 +1,133 @@
+export const ta = {
+    // Navigation
+    features: "அம்சங்கள்",
+    howItWorks: "எப்படி வேலை செய்கிறது",
+    impact: "தாக்கம்",
+    farmerLogin: "விவசாயி உள்நுழைவு",
+
+    // Hero Section
+    heroBadge: "72 மணி நேர லாப மேம்பாடு இயந்திரம்",
+    heroHeading1: "நஷ்டத்தில் விற்பதை நிறுத்துங்கள்.",
+    heroHeading2: "அதிகபட்ச லாபத்தில் விற்க தொடங்குங்கள்.",
+    heroDescription: "மிட்டிமித்ரா என்பது உள்ளூர் வானிலை, சந்தை விலைகள் மற்றும் போக்குவரத்து খরவுகளை பகுப்பாய்வு செய்து அதிக லாபம் ஈட்ட எப்போது, எங்கே விற்க வேண்டும் என்று கூறும் வழிகாட்டி.",
+    enterDecisionHub: "முடிவு மையத்திற்கு செல்லுங்கள்",
+    watchDemo: "விளக்கக் காட்சி",
+
+    // Auth / Login
+    phoneNumber: "கைபேசி எண்",
+    enterPhone: "10-இலக்க எண்ணை உள்ளிடவும்",
+    getOtp: "ஓடிபி பெறுங்கள்",
+    sending: "நேரலை...",
+    enterOtp: "ஓடிபி உள்ளிடவும்",
+    enter6Digit: "6-இலக்க குறியீடு",
+    verifying: "சரிபார்க்கிறது...",
+    verifyLogin: "அனுமதி பெறு",
+    changeNumber: "எண்ணை மாற்றுக",
+    invalidPhone: "சரியான 10-இலக்க எண்ணை உள்ளிடவும்.",
+    invalidOtp: "தவறான ஓடிபி.",
+    sessionExpired: "அமர்வு காலாவதியானது.",
+
+    // Dashboard Header
+    offlineMode: "ஆஃப்லைன் முறை",
+    temporalArbitrageEngine: "நேர-இடைவெளி லாப இயந்திரம்",
+    simulateShock: "அதிர்ச்சியை உருவகப்படுத்து ⚡",
+
+    // Dashboard Left Col
+    recommendation: "பரிந்துரை",
+    sell: "விற்கலாம்",
+    wait: "காத்திருங்கள்",
+    hold: "தவிர்க்கவும்",
+    optimalWindow: "சிறந்த நேரம்",
+    suboptimalConditions: "சாதகமற்ற சூழ்நிலை",
+    monitorClosely: "கூர்ந்து கவனிக்குக",
+    maxRealization: "அதிகபட்ச எதிர்பார்க்கப்படும் லாபம்",
+    temp: "வெப்பநிலை",
+    humidity: "ஈரப்பதம்",
+    cropProfile: "தற்போதைய பயிர்",
+    soilMoisture: "மண் ஈரப்பதம்",
+    spoilageRisk: "அழுகும் ஆபத்து",
+
+    // Dashboard Right Col
+    marketOrbit: "சந்தை வரிசை (நிகர லாபம்)",
+    liveData: "நேரலை தரவு",
+    mandiDesc: "போக்குவரத்து மற்றும் தூர வீழ்ச்சியைக் கழித்து லாப அடிப்படையில் சந்தைகள்.",
+    agriVakeel: "அக்ரி-வக்கீல் ஏஐ (விளக்கம்)",
+    listenHindi: "ஹிந்தியில் கேளுங்கள்",
+    listenMarathi: "மராத்தியில் கேளுங்கள்",
+
+    // Dict
+    mandi: "மண்டி (சந்தை)",
+    dist: "தூரம்",
+    price: "விலை",
+    netProfit: "நிகர லாபம்",
+    best: "சிறந்தது",
+
+    // Bento Grid
+    bentoTitle: "விவசாய அறிவுறுத்தல், எளிய முறையில்.",
+    bentoDesc: "நீங்கள் சந்தை வீழ்ச்சியை சமாளிக்க தேவையான அனைத்தும்.",
+    shockTitle: "கருப்பு ஸ்வான் அதிர்ச்சி பகுப்பாய்வு",
+    shockDesc: "24 மணி நேரத்திற்கு முன்பே விலை வீழ்ச்சி மற்றும் வானிலை சறுக்கலை கணிக்கும் அமைப்பு.",
+    voiceTitle: "அக்ரி-வக்கீல் ஏஐ",
+    voiceDesc: "ஹிந்தி மற்றும் பிராந்திய மொழிகளில் பேசக்கூடிய ஏஐ.",
+    offlineTitle: "ஆஃப்லைன் இணைப்பு",
+    offlineDesc: "இணையம் இல்லாத பொது செயல்படுகிறது.",
+    arbitrageTitle: "நிகர லாப ஆல்காரிதம்",
+    arbitrageDesc: "போக்குவரத்து மற்றும் பிற খরவுகளை கருத்தில் கொண்டு உண்மையான லாபத்தை கணக்கிடுகிறது.",
+
+    // Sidebar & Navigation
+    strategy: "யுக்தி",
+    marketMaps: "சந்தை வரைபடங்கள்",
+    accounts: "கணக்குகள்",
+    proFarmer: "ப்ரோ விவசாயி",
+
+    // Market Maps Page
+    regionalAnalysis: "பிராந்திய சந்தை பகுப்பாய்வு",
+    mandiName: "மண்டியின் பெயர்",
+    distance: "தூரம்",
+    logiSpoilage: "கழிவுகள் மற்றும் செலவுகள்",
+    takeHomeProfit: "நிகர லாபம்",
+    noAlternatives: "மாற்று சந்தைகள் இல்லை.",
+    warningSpoilage: "எச்சரிக்கை: அதிக சரிவு ஆபத்து",
+    optimalRoute: "சிறந்த தடம்",
+    deadZone: "பழுதான பாதை",
+    activeReroute: "பாதை மாற்றம்",
+    pivotingTo: "மாறுகிறது",
+    spatialProfitAnalysis: "லாப பகுப்பாய்வு",
+    liveGPSTransitData: "நேரடி GPS தகவல்",
+    evaluatingDestinations: "தூரம் மட்டுமின்றி, போக்குவரத்து கழிவுகளையும் விலக்கி மண்டிகள் வரிசைப்படுத்தப்படுகின்றன.",
+    routeOptimizationLogic: "வழி உகப்பாக்க தர்க்கம்",
+
+    // Accounts Page
+    accountFarmProfile: "கணக்கு மற்றும் பண்ணை விவரம்",
+    manageFarmData: "பண்ணை விவரங்களை நிர்வகிக்கவும்",
+    verified: "சரிபார்க்கப்பட்டது",
+    fullName: "முழு பெயர்",
+    phoneWarning: "எண்ணை மாற்ற இயலாது.",
+    primaryCrop: "முதன்மை பயிர்",
+    landSizeAcres: "நிலம் (ஏக்கர்)",
+    saveChanges: "மாற்றங்களைச் சேமிக்கவும்",
+    updating: "புதுப்பிக்கிறது...",
+    profileUpdated: "வெற்றிகரமாக புதுப்பிக்கப்பட்டது!",
+    profileFailed: "புதுப்பித்தல் தோல்வி.",
+    select: "தேர்வு செய்...",
+
+    // Agri Vakeel Page
+    askAgriVakeel: "அக்ரி-வக்கீலை கேளுங்கள்",
+    aiConsultation: "குரல் AI ஆலோசனை",
+    listening: "கேட்கிறது...",
+    processing: "செயலாக்குகிறது...",
+    stopAudio: "இசைபகுதியை நிறுத்து",
+    failedToConnect: "தகவல் பரிமாற்றம் தோல்வி",
+    recommendationFetchError: "நாங்கள் பரிந்துரைகளை வழங்க முடியவில்லை. மறுபடியும் முயற்சிக்கவும்.",
+    retryConnection: "மீண்டும் முயற்சிக்கவும்",
+    suggestions: "பரிந்துரைகள்",
+    marketInsight: "சந்தை நிலவரம்",
+    suggestion1Query: "ஏன் விலை குறைகிறது?",
+    suggestion2Query: "அறுவடைக்கு 2 நாள் காத்திருக்கவா?",
+    weatherRisk: "வானிலை ஆபத்து",
+    suggestion3Query: "இன்று இரவு மழை வருமா?",
+    arbitrage: "லாபம்",
+    suggestion4Query: "எந்த மண்டி அதிக லாபம் தரும்?",
+    proTip: "சிறப்பு ஆலோசனை",
+    proTipDesc: "உங்கள் உள்ளூர் மொழியில் நீங்கள் பேசலாம். நான் உங்கள் மொழியிலேயே பதிலளிப்பேன்."
+};

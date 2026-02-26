@@ -1,0 +1,133 @@
+export const gu = {
+    // Navigation
+    features: "સુવિધાઓ",
+    howItWorks: "તે કેવી રીતે કામ કરે છે",
+    impact: "પ્રભાવ",
+    farmerLogin: "ખેડૂત લોગિન",
+
+    // Hero Section
+    heroBadge: "72-કલાકનું ટેમ્પોરલ આર્બિટ્રેજ એન્જિન",
+    heroHeading1: "ખોટમાં વેચવાનું બંધ કરો.",
+    heroHeading2: "નફામાં વેચવાનું શરૂ કરો.",
+    heroDescription: "મીટ્ટીમિત્ર એક નિર્ણય સપોર્ટ સિસ્ટમ છે જે સ્થાનિક હવામાન, બજારના ભાવ અને ટ્રાન્સપોર્ટ ખર્ચને ધ્યાનમાં રાખીને તમને વધુ નફો રળી આપે છે.",
+    enterDecisionHub: "નિર્ણય હબમાં પ્રવેશ કરો",
+    watchDemo: "ડેમો જુઓ",
+
+    // Auth / Login
+    phoneNumber: "ફોન નંબર",
+    enterPhone: "10-અંકનો નંબર દાખલ કરો",
+    getOtp: "OTP મેળવો",
+    sending: "મોકલી રહ્યું છે...",
+    enterOtp: "OTP દાખલ કરો",
+    enter6Digit: "6-અંકનો કોડ",
+    verifying: "ચકાસણી ચાલુ છે...",
+    verifyLogin: "ચકાસણી કરો અને લોગિન કરો",
+    changeNumber: "નંબર બદલો",
+    invalidPhone: "કૃપા કરીને સાચો 10-અંકનો નંબર દાખલ કરો.",
+    invalidOtp: "અયોગ્ય OTP.",
+    sessionExpired: "સત્ર સમાપ્ત થઈ ગયું છે.",
+
+    // Dashboard Header
+    offlineMode: "ઓફલાઇન મોડ",
+    temporalArbitrageEngine: "ટેમ્પોરલ આર્બિટ્રેજ એન્જિન",
+    simulateShock: "શોક સિમ્યુલેટ કરો ⚡",
+
+    // Dashboard Left Col
+    recommendation: "ભલામણ",
+    sell: "વેચો",
+    wait: "રાહ જુઓ",
+    hold: "માલ રોકો",
+    optimalWindow: "ઉત્તમ સમય મળ્યો",
+    suboptimalConditions: "પરિસ્થિતિઓ અનુકૂળ નથી",
+    monitorClosely: "પરિસ્થિતિ પર ધ્યાન રાખો",
+    maxRealization: "મહત્તમ અપેક્ષિત આવક",
+    temp: "તાપમાન",
+    humidity: "ભેજ",
+    cropProfile: "વર્તમાન પાક",
+    soilMoisture: "જમીનનો ભેજ",
+    spoilageRisk: "બગાડવાનું જોખમ",
+
+    // Dashboard Right Col
+    marketOrbit: "માર્કેટ ઓર્બિટ (ચોખ્ખો નફો)",
+    liveData: "લાઇવ ડેટા",
+    mandiDesc: "પરિવહન અને અંતર કાપીને ચોખ્ખા નફા મુજબ વર્ગીકૃત બજારો.",
+    agriVakeel: "કૃષિ-વકીલ AI (સ્પષ્ટીકરણ)",
+    listenHindi: "હિન્દીમાં સાંભળો",
+    listenMarathi: "મરાઠીમાં સાંભળો",
+
+    // Dict
+    mandi: "મંડી",
+    dist: "અંતર",
+    price: "ભાવ",
+    netProfit: "ચોખ્ખો નફો",
+    best: "શ્રેષ્ઠ",
+
+    // Bento Grid
+    bentoTitle: "કૃષિ બુદ્ધિમત્તા, સરળ.",
+    bentoDesc: "બજારના બદલાવ સામે ટકી રહેવા માટેનું ડેશબોર્ડ.",
+    shockTitle: "બ્લેક સ્વાન શોક વિશ્લેષકો",
+    shockDesc: "આકસ્મિક ભાવ ઘટાડા અને ખરાબ હવામાનની 24 કલાક પહેલાની જાણકારી.",
+    voiceTitle: "કૃષિ-વકીલ AI",
+    voiceDesc: "હિન્દી અને ગુજરાતીમાં વાત કરતું AI.",
+    offlineTitle: "ઓફલાઇન કનેક્ટિવિટી",
+    offlineDesc: "ઇન્ટરનેટ ન હોય તો પણ કાર્યરત.",
+    arbitrageTitle: "ચોખ્ખી આવક અલ્ગોરિધમ",
+    arbitrageDesc: "બધા ખર્ચ કાઢ્યા પછીનો ચોખ્ખો નફો બતાવે છે.",
+
+    // Sidebar & Navigation
+    strategy: "વ્યૂહરચના",
+    marketMaps: "માર્કેટ નકશા",
+    accounts: "ખાતાઓ",
+    proFarmer: "પ્રો ખેડૂત",
+
+    // Market Maps Page
+    regionalAnalysis: "પ્રાદેશિક બજાર વિશ્લેષણ",
+    mandiName: "મંડીનું નામ",
+    distance: "અંતર",
+    logiSpoilage: "ટ્રાન્સપોર્ટ અને બગાડ",
+    takeHomeProfit: "ચોખ્ખી કમાણી",
+    noAlternatives: "કોઈ અન્ય બજાર ઉપલબ્ધ નથી.",
+    warningSpoilage: "ચેતવણી: વધુ બગાડવાનું જોખમ",
+    optimalRoute: "ઉત્તમ માર્ગ",
+    deadZone: "ડેડ ઝોન",
+    activeReroute: "સક્રિય રૂટ બદલ્યો",
+    pivotingTo: "વળી રહ્યા છે",
+    spatialProfitAnalysis: "નફાનું વિશ્લેષણ",
+    liveGPSTransitData: "લાઇવ GPS ડેટા",
+    evaluatingDestinations: "માત્ર અંતર નહિ, પણ ટ્રાન્સપોર્ટ અને જોખમ બાદ કર્યા પછી બજારોને ક્રમાંક આપે છે.",
+    routeOptimizationLogic: "માર્ગ ઑપ્ટિમાઇઝેશન લૉજિક",
+
+    // Accounts Page
+    accountFarmProfile: "ખાતું અને ફાર્મ પ્રોફાઇલ",
+    manageFarmData: "તમારા ફાર્મની માહિતી મેનેજ કરો",
+    verified: "વેરિફાઇડ",
+    fullName: "પૂરું નામ",
+    phoneWarning: "ફોન નંબર બદલી શકાતો નથી.",
+    primaryCrop: "મુખ્ય પાક",
+    landSizeAcres: "જમીનનો આકાર (એકર)",
+    saveChanges: "ફેરફારો સેવ કરો",
+    updating: "અપડેટ થઈ રહ્યું છે...",
+    profileUpdated: "પ્રોફાઇલ સફળતાપૂર્વક અપડેટ થઈ!",
+    profileFailed: "અપડેટ કરવામાં નિષ્ફળ.",
+    select: "પસંદ કરો...",
+
+    // Agri Vakeel Page
+    askAgriVakeel: "કૃષિ-વકીલને પૂછો",
+    aiConsultation: "વોઇસ AI સલાહ",
+    listening: "સાંભળી રહ્યું છે...",
+    processing: "પ્રોસેસિંગ...",
+    stopAudio: "ઓડિયો બંધ કરો",
+    failedToConnect: "એન્જિન સાથે કનેક્ટ થવામાં નિષ્ફળ",
+    recommendationFetchError: "અમે તમારી ભલામણો મેળવી શક્યા નથી. ફરી પ્રયાસ કરો.",
+    retryConnection: "ફરી પ્રયાસ કરો",
+    suggestions: "સૂચનો",
+    marketInsight: "બજારની સમજ",
+    suggestion1Query: "ભાવ કેમ ઘટી રહ્યા છે?",
+    suggestion2Query: "શું મારે 2 દિવસ રાહ જોવી જોઈએ?",
+    weatherRisk: "હવામાનનું જોખમ",
+    suggestion3Query: "શું આજે રાત્રે વરસાદ પડશે?",
+    arbitrage: "કમાણી",
+    suggestion4Query: "કઈ મંડીમાં સૌથી વધુ નફો થશે?",
+    proTip: "પ્રો ટીપ",
+    proTipDesc: "તમે તમારી ભાષામાં વાત કરી શકો છો. હું આપમેળે તમારી ભાષા સમજીને જવાબ આપીશ."
+};

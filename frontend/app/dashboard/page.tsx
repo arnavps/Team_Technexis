@@ -16,7 +16,7 @@ import { ManualOverrideModal } from '@/components/dashboard/ManualOverrideModal'
 import { auth } from '@/services/firebase';
 
 export default function DashboardPage() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
@@ -105,10 +105,11 @@ export default function DashboardPage() {
             }
 
             const payload = {
-                crop: "Tomato",
+                crop: "", // Send empty to force backend regional fallback
                 location: { lat: 18.5204, lng: 73.8567 }, // Mock Pune
                 yield_est_quintals: 50.0,
-                base_spoilage_rate: 0.05
+                base_spoilage_rate: 0.05,
+                language: language
             };
 
             const backendUrl = `http://${window.location.hostname}:8000/recommendation`;
