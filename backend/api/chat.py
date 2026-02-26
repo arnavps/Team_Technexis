@@ -65,6 +65,7 @@ Here is the CURRENT REAL-TIME DATA for the farmer:
 - Estimated Net Profit: ₹{profit}
 - Best Market to sell: {best_mandi} (Current Price: ₹{mandi.get('current_price', 0)}/Qtl)
 - Weather: {weather.get('temperature_c', 0)}°C, Rain Probability: {weather.get('rain_probability_percent', 0)}%
+{f"CRITICAL: The farmer has MANUALLY CALIBRATED the environmental data ({context.get('manual_override_count')} overrides). Trust the farmer's ground truth over the sensors. Acknowledge this in your opening." if context.get('is_manual_override') else ""}
 
 """
     if shock and shock.get("is_shock"):

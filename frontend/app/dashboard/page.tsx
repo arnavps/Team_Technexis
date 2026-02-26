@@ -13,13 +13,65 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { VerdictCard } from './VerdictCard';
 import { MetricsGrid } from './MetricsGrid';
+import { ManualOverrideModal } from '@/components/dashboard/ManualOverrideModal';
 
 export default function DashboardPage() {
     const { t } = useLanguage();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [lastFetched, setLastFetched] = useState<Date | null>(null);
+
+    // Manual Overrides State
+    const [overrides, setOverrides] = useState<Record<string, number>>({});
+    const [modalConfig, setModalConfig] = useState<{
+        isOpen: boolean;
+        metric: string;
+        value: number;
+        unit: string;
+    }>({ isOpen: false, metric: '', value: 0, unit: '' });
+
     const { location, requestLocation } = useGPS();
     const { isOnline, cachedData, saveToCache } = useOfflineCache('dashboard_recommendation');
+
+    // Trigger re-calculation when overrides change locally
+    const recalculateWithOverrides = (currentData: any, newOverrides: Record<string, number>) => {
+        if (!currentData) return;
+        const updated = JSON.parse(JSON.stringify(currentData)); // Deep clone
+
+        // Mocking the backend logic for immediate UI response
+        const tempKey = t('temp') || 'Temperature';
+        const soilKey = t('soilMoisture') || 'Soil Moisture';
+
+        if (newOverrides[tempKey]) {
+            updated.weather.temperature_c = newOverrides[tempKey];
+            if (newOverrides[tempKey] > 35) {
+                updated.weather.spoilage_risk = Math.min(100, (updated.weather.spoilage_risk || 0) + 10);
+                updated.net_realization_inr -= 500;
+            }
+        }
+
+        if (newOverrides[soilKey]) {
+            updated.weather.soil_moisture = newOverrides[soilKey];
+            if (newOverrides[soilKey] > 70) {
+                updated.status = "YELLOW";
+            }
+        }
+
+        updated.is_manual_override = true;
+        updated.manual_override_count = Object.keys(newOverrides).length;
+        setData(updated);
+    };
+
+    const handleMetricClick = (metric: string, value: number, unit: string) => {
+        setModalConfig({ isOpen: true, metric, value, unit });
+    };
+
+    const handleSaveOverride = (newValue: number) => {
+        const newOverrides = { ...overrides, [modalConfig.metric]: newValue };
+        setOverrides(newOverrides);
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
+        recalculateWithOverrides(data, newOverrides);
+    };
 
     const fetchRecommendation = async (isDemo = false) => {
         setLoading(true);
@@ -60,11 +112,11 @@ export default function DashboardPage() {
                 }
 
                 setData(json);
+                setLastFetched(new Date());
                 saveToCache(json);
             }
         } catch (err) {
             console.error("Failed to fetch recommendation", err);
-            // Fallback to cache if network fails while technically 'online'
             if (cachedData) setData(cachedData);
         } finally {
             setLoading(false);
@@ -73,7 +125,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchRecommendation();
-    }, [isOnline]); // Re-run when coming back online
+    }, [isOnline]);
 
     if (loading) {
         return (
@@ -83,7 +135,6 @@ export default function DashboardPage() {
         );
     }
 
-    // Generate mock mandi list for the table based on API response
     const mandiList = data ? [
         {
             id: "1",
@@ -106,7 +157,7 @@ export default function DashboardPage() {
             name: "Nashik Onion Market",
             distanceKm: roundVal(data.mandi_stats.distance_km + 110),
             currentPrice: data.mandi_stats.current_price + 4.0,
-            netProfit: data.net_realization_inr - 900, // Higher transport eats profit
+            netProfit: data.net_realization_inr - 900,
             isOptimal: false
         }
     ] : [];
@@ -126,6 +177,14 @@ export default function DashboardPage() {
                             </span>
                         )}
                         <p className="text-sm text-gray-400">{t('temporalArbitrageEngine')}</p>
+                        {lastFetched && (
+                            <div className="flex items-center space-x-1.5 ml-4 border-l border-white/10 pl-4 py-0.5">
+                                <span className="w-1.5 h-1.5 bg-mint rounded-full animate-pulse"></span>
+                                <span className="text-[10px] text-gray-500 uppercase tracking-widest font-medium">
+                                    Live Sync: {lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="flex space-x-3 items-center">
@@ -142,7 +201,7 @@ export default function DashboardPage() {
                 </div>
             </header>
 
-            {/* Z-score > 2 Volatility Insight Banner */}
+            {/* Shock Alert Banner */}
             {data?.shock_analysis?.z_score > 2 && (
                 <ShockAlertBanner
                     message=""
@@ -160,7 +219,10 @@ export default function DashboardPage() {
                     <VerdictCard data={data} />
 
                     {/* 4-Item Environmental Metrics Grid */}
-                    <MetricsGrid data={data} />
+                    <MetricsGrid
+                        data={data}
+                        onMetricClick={handleMetricClick}
+                    />
                 </div>
 
                 {/* Right Column - Deep Analytics */}
@@ -173,13 +235,22 @@ export default function DashboardPage() {
                         <p className="text-sm text-gray-400 mb-6">{t('mandiDesc')}</p>
                         <MandiTable mandis={mandiList} />
                     </GlassCard>
-
                 </div>
 
             </div>
 
             {/* Floating Voice Assistant */}
             <VoiceAssistant dashboardData={data} />
+
+            {/* Manual Override Modal */}
+            <ManualOverrideModal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                currentValue={modalConfig.value}
+                metricLabel={modalConfig.metric}
+                unit={modalConfig.unit}
+                onSave={handleSaveOverride}
+            />
         </div>
     );
 }

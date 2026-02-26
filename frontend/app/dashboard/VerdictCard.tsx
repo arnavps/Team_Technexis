@@ -62,22 +62,52 @@ export function VerdictCard({ data }: VerdictCardProps) {
                 )}
             </div>
 
-            {/* Net Realization Formula Breakdown */}
-            <div className="z-10 w-full mt-4 bg-white/5 border border-white/10 rounded-2xl p-5 text-left">
-                <div className="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
-                    <span className="text-xs uppercase tracking-wider text-gray-400 font-bold">Net Realization Algorithm</span>
-                    <span className="text-mint font-mono font-bold text-lg">₹{(finalProfit).toLocaleString('en-IN')}</span>
+            {/* Net Realization (Live Accounting Breakdown) */}
+            <div className="z-10 w-full mt-4 bg-white/5 border border-white/10 rounded-3xl p-6 text-left group">
+                <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
+                    <div>
+                        <span className="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Net Realization Algorithm</span>
+                        <div className="flex items-center space-x-2">
+                            <span className="text-[8px] bg-mint/10 text-mint px-2 py-0.5 rounded-full font-bold border border-mint/20">LIVE CALCULATOR</span>
+                            <span className="text-[8px] text-gray-600 uppercase font-black">Source: e-NAM + GPS Transit</span>
+                        </div>
+                    </div>
+                    <span className="text-mint font-mono font-bold text-2xl drop-shadow-[0_0_10px_rgba(32,255,189,0.3)]">
+                        ₹{(finalProfit).toLocaleString('en-IN')}
+                    </span>
                 </div>
 
-                <div className="space-y-2 text-sm font-mono flex flex-col items-center">
-                    <div className="text-gray-300 bg-black/20 px-3 py-2 rounded-lg w-full text-center">
-                        <span className="text-mint font-semibold">Net Profit</span> = (Price × Yield) - (Logistics + Spoilage Penalty)
+                <div className="space-y-4 font-mono text-sm">
+                    {/* Gross */}
+                    <div className="flex justify-between items-center text-gray-300">
+                        <span className="flex items-center">
+                            <span className="w-1.5 h-1.5 bg-mint rounded-full mr-2"></span>
+                            Gross Market Value
+                        </span>
+                        <span className="text-white">+₹{(grossRevenue).toLocaleString('en-IN')}</span>
                     </div>
 
-                    <div className="flex justify-between w-full text-gray-400 px-2 mt-2">
-                        <span>(₹{price} × {yieldQtl} Qtl)</span>
-                        <span>-</span>
-                        <span>(₹{logistics} + ₹{spoilagePenalty})</span>
+                    {/* Logistics */}
+                    <div className="flex justify-between items-center text-gray-400 group-hover:text-gray-300 transition-colors">
+                        <span className="flex items-center">
+                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
+                            Logistics ({distanceKm}km)
+                        </span>
+                        <span className="text-red-400/80">-₹{(logistics).toLocaleString('en-IN')}</span>
+                    </div>
+
+                    {/* Spoilage */}
+                    <div className="flex justify-between items-center text-gray-400 group-hover:text-gray-300 transition-colors">
+                        <span className="flex items-center">
+                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
+                            Env. Spoilage Risk
+                        </span>
+                        <span className="text-red-400/80">-₹{(spoilagePenalty).toLocaleString('en-IN')}</span>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 flex justify-between items-center bg-mint/5 -mx-6 px-6 -mb-6 rounded-b-3xl">
+                        <span className="text-xs text-mint/60 font-bold uppercase">Estimated Take-Home</span>
+                        <span className="text-white font-black text-lg">₹{(finalProfit).toLocaleString('en-IN')}</span>
                     </div>
                 </div>
             </div>
