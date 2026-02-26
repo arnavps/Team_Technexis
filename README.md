@@ -4,7 +4,7 @@
 ## 📌 Problem Statement
 Indian farmers lose ₹92,000 Crore annually due to post-harvest mistiming. This isn't a "farming" problem; it's a coordination failure. When thousands of farmers harvest simultaneously without data, they create artificial supply gluts, crashing prices by up to 80% and forcing distress sales.
 
-**KrishiAI** transforms the farmer from a "Price Taker" into a "Market Strategist" using fused intelligence.
+**MittiMitra** transforms the farmer from a "Price Taker" into a "Market Strategist" using fused intelligence.
 
 ## 🚀 Key Features
 
@@ -29,7 +29,7 @@ Indian farmers lose ₹92,000 Crore annually due to post-harvest mistiming. This
 - **Load Matching**: Suggests co-loading with neighbors to split transport costs.
 - **Net-Profit Ranking**: Ranks Mandis by *Price - (Fuel + Spoilage Risk)*.
 
-# KrishiAI (AgriChain) - The Temporal Arbitrage Engine
+# MittiMitra (AgriChain) - The Temporal Arbitrage Engine
 
 KrishiAI (conceptually "MittiMitra") is a **Decision Support System** built to optimize the 72-hour harvest-to-market window for Indian smallholder farmers. It digests hyper-local weather, Mandi prices, transport costs, and market volatility to output a single, actionable recommendation: **Sell, Wait, or Hold.**
 

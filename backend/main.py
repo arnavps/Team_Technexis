@@ -2,7 +2,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any
 
-from engine.profit_calc import calculate_net_profit
+from engine.profit_calc import get_net_realization
+from engine.map_logic import calculate_spatial_profit
 from engine.shock_analyzer import detect_market_shock, detect_volume_shock
 from integrations.mandi_api import fetch_mandi_prices
 from integrations.weather_api import fetch_district_weather
@@ -46,11 +47,13 @@ def get_harvest_recommendation(data: HarvestRequest):
     try:
         # 1. Fetch Integration Data
         weather_data = fetch_district_weather(data.location)
-        mandi_data = fetch_mandi_prices(data.crop, data.location)
+        mandi_response = fetch_mandi_prices(data.crop, data.location)
+        primary_mandi = mandi_response["primary"]
+        regional_mandis = mandi_response["regional_options"]
         
-        # 2. Risk & Shock Analysis
-        price_shock = detect_market_shock(mandi_data["current_price"], mandi_data["7_day_history"])
-        volume_shock = detect_volume_shock(mandi_data["current_volume_quintals"], mandi_data["average_volume_quintals"])
+        # 2. Risk & Shock Analysis (on Primary Mandi)
+        price_shock = detect_market_shock(primary_mandi["current_price"], primary_mandi["7_day_history"])
+        volume_shock = detect_volume_shock(primary_mandi["current_volume_quintals"], primary_mandi["average_volume_quintals"])
         
         # Determine if there's any active shock
         active_shock = None
@@ -66,31 +69,80 @@ def get_harvest_recommendation(data: HarvestRequest):
                 "pivot_advice": "EMERGENCY: Cover your produce immediately or delay transit!"
             }
 
-        # 3. Profit Calculation
-        temp_c = weather_data["temperature_c"]
-        high_humidity = weather_data["humidity_percent"] > 70
+        # 3. Spatial Profit Analysis (Map Logic)
+        temp_today = weather_data["temperature_c"]
+        humidity_today = weather_data["humidity_percent"]
         
-        # Calculate logistics
-        logistics_cost = mandi_data["distance_km"] * mandi_data["transport_rate_per_km"]
-        
-        # Calculate net profit
-        net_profit = calculate_net_profit(
-            price=mandi_data["current_price"],
+        # Calculate logistics and profit for ALL regional options
+        spatial_profits = calculate_spatial_profit(
+            crop=data.crop,
             yield_est=data.yield_est_quintals,
-            logistics_cost=logistics_cost,
-            base_spoilage_rate=data.base_spoilage_rate,
-            temp_c=temp_c,
-            high_humidity=high_humidity
+            temp_c=temp_today,
+            humidity=humidity_today,
+            available_mandis=regional_mandis
         )
         
-        # 4. Synthesize Final Recommendation
+        best_overall_mandi = spatial_profits[0]
+        
+        dist = primary_mandi["distance_km"]
+        
+        # Calculate for TODAY (Assume 2 hours shelf/transit time to primary)
+        profit_today = get_net_realization(
+            market_price=primary_mandi["current_price"],
+            crop_type=data.crop,
+            distance_km=dist,
+            temp_c=temp_today,
+            humidity=humidity_today,
+            hours_to_market=2.0
+        )
+        
+        # Calculate for 48 HOURS (Assume 50 hours shelf/transit time total)
+        price_forecast_48h = primary_mandi["current_price"] * 1.05 
+        temp_forecast_48h = temp_today + 2.0 
+        
+        profit_48h = get_net_realization(
+            market_price=price_forecast_48h,
+            crop_type=data.crop,
+            distance_km=dist,
+            temp_c=temp_forecast_48h,
+            humidity=humidity_today,
+            hours_to_market=50.0
+        )
+        
+        # 4. Synthesize Final Recommendation & Routing Pivot
+        is_selling_optimal = profit_today >= profit_48h
+        status = "GREEN" if is_selling_optimal else "RED"
+        
+        pivot_mandi = None
+        
+        # Alternative Destination Discovery Trigger
+        if active_shock:
+            status = "RED" # Shocks always override to RED/WAIT for primary
+            
+            # Find the best alternative that IS NOT the primary mandi
+            for option in spatial_profits:
+                if option["mandi_name"] != primary_mandi["name"] and not option.get("is_dead_zone"):
+                    pivot_mandi = option
+                    break
+            
+            if pivot_mandi:
+                 active_shock["pivot_advice"] = f"EMERGENCY: Primary market crashed. Re-routing you to {pivot_mandi['mandi_name']} ({round(pivot_mandi['distance_km'], 1)}km). Estimated Net Profit: ₹{pivot_mandi['total_net_profit']}"
+                 active_shock["pivot_mandi"] = pivot_mandi
+            
         recommendation = {
-            "status": "GREEN" if not active_shock else "RED",
-            "net_realization_inr": round(net_profit, 2),
-            "best_mandi": f"Local Mandi ({round(mandi_data['distance_km'], 1)} km)",
+            "status": status,
+            "net_realization_inr": round(profit_today, 2),
+            "profit_forecast_48h": round(profit_48h, 2),
+            "best_mandi": f"{primary_mandi['name']} ({round(dist, 1)} km)",
             "weather": weather_data,
-            "mandi_stats": mandi_data,
-            "shock_alert": active_shock
+            "mandi_stats": primary_mandi, # Send primary stats for the UI cards
+            "shock_alert": active_shock,
+            "regional_options": spatial_profits, # Send all map data for the Market Maps tab
+            "decay_metrics": {
+                "today_profit": round(profit_today, 2),
+                "future_profit": round(profit_48h, 2),
+                "profit_difference": round(profit_today - profit_48h, 2)
+            }
         }
         
         return recommendation

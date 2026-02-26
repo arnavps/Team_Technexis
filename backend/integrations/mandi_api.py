@@ -21,12 +21,46 @@ def fetch_mandi_prices(crop: str, location: dict) -> Dict[str, Any]:
     # Introduce random variation to current price
     current_price = base_price + random.uniform(-1, 1)
     
-    return {
+    # Primary Mandi details
+    primary_mandi = {
+        "name": "Local APMC",
         "crop": crop,
         "current_price": round(current_price, 2),
         "7_day_history": [round(p, 2) for p in price_history],
         "current_volume_quintals": random.randint(100, 500), # Typical volume
         "average_volume_quintals": 250,
-        "distance_km": random.uniform(5.0, 50.0), # Distance from farmer to mandi
+        "distance_km": random.uniform(5.0, 30.0), # Distance from farmer to mandi
         "transport_rate_per_km": 15.0 # Base fuel/transport rate
+    }
+    
+    # Generate 3 alternative regional options for Spatial Profit Analysis
+    regional_options = [
+        primary_mandi,
+        {
+            "name": "District Main Market",
+            "crop": crop,
+            "current_price": round(current_price + random.uniform(2, 6), 2), # Often higher price
+            "distance_km": random.uniform(35.0, 80.0), # But further away
+            "transport_rate_per_km": 15.0
+        },
+        {
+            "name": "State Wholesale Hub",
+            "crop": crop,
+            "current_price": round(current_price + random.uniform(5, 12), 2),
+            "distance_km": random.uniform(90.0, 180.0), # Much further
+            "transport_rate_per_km": 12.0 # Slightly cheaper bulk transport
+        },
+        {
+            "name": "Nearest Cold Storage",
+            "crop": crop,
+            "current_price": round(current_price * 0.9, 2), # Lower immediate realization
+            "distance_km": random.uniform(10.0, 40.0),
+            "transport_rate_per_km": 15.0,
+            "is_cold_storage": True
+        }
+    ]
+    
+    return {
+        "primary": primary_mandi,
+        "regional_options": regional_options
     }

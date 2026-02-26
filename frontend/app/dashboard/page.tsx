@@ -135,32 +135,14 @@ export default function DashboardPage() {
         );
     }
 
-    const mandiList = data ? [
-        {
-            id: "1",
-            name: data.best_mandi,
-            distanceKm: roundVal(data.mandi_stats.distance_km),
-            currentPrice: data.mandi_stats.current_price,
-            netProfit: data.net_realization_inr,
-            isOptimal: true
-        },
-        {
-            id: "2",
-            name: "Solapur APMC",
-            distanceKm: roundVal(data.mandi_stats.distance_km + 45),
-            currentPrice: data.mandi_stats.current_price - 2.5,
-            netProfit: data.net_realization_inr - 1200,
-            isOptimal: false
-        },
-        {
-            id: "3",
-            name: "Nashik Onion Market",
-            distanceKm: roundVal(data.mandi_stats.distance_km + 110),
-            currentPrice: data.mandi_stats.current_price + 4.0,
-            netProfit: data.net_realization_inr - 900,
-            isOptimal: false
-        }
-    ] : [];
+    const mandiList = data?.regional_options ? data.regional_options.map((option: any, index: number) => ({
+        id: index.toString(),
+        name: option.mandi_name,
+        distanceKm: roundVal(option.distance_km),
+        currentPrice: option.market_price,
+        netProfit: option.total_net_profit,
+        isOptimal: index === 0 // The backend sorts by most profitable first
+    })) : [];
 
     return (
         <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6">

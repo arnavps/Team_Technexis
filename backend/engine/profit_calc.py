@@ -1,16 +1,27 @@
-from .decay_logic import calculate_spoilage_penalty
+from .decay_logic import calculate_quality_loss
 
-def calculate_net_profit(price: float, yield_est: float, logistics_cost: float, base_spoilage_rate: float, temp_c: float, high_humidity: bool) -> float:
+def get_net_realization(
+    market_price: float, 
+    crop_type: str,
+    distance_km: float, 
+    temp_c: float, 
+    humidity: float, 
+    hours_to_market: float,
+    transport_cost_per_km: float = 15.0 # Baseline INR/km for small transport
+) -> float:
     """
-    Calculates the Net Realization (Profit) for a harvest.
-    Formula: Net Profit = (Price * Yield) - (Logistics + SpoilagePenalty)
+    MittiMitra Optimization Formula: Net Realization Logic.
+    Formula: Net Realization = Market Price - Transport Cost - Quality Loss
     """
-    gross_revenue = price * yield_est
+    # 1. Transport Cost
+    transport_cost = distance_km * transport_cost_per_km
     
-    # Calculate Spoilage Penalty applied to the gross revenue
-    spoilage_multiplier = calculate_spoilage_penalty(base_spoilage_rate, temp_c, high_humidity)
-    spoilage_penalty_value = gross_revenue * spoilage_multiplier
+    # 2. Quality Loss (Spoilage penalty in INR)
+    # Note: calculate_quality_loss returns a percentage (0.0 to 1.0)
+    loss_pct = calculate_quality_loss(crop_type, temp_c, humidity, hours_to_market)
+    quality_loss_inr = loss_pct * market_price
     
-    net_profit = gross_revenue - (logistics_cost + spoilage_penalty_value)
+    # 3. Final Calculation
+    net_realization = market_price - transport_cost - quality_loss_inr
     
-    return net_profit
+    return round(net_realization, 2)

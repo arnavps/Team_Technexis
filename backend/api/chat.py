@@ -65,6 +65,10 @@ Here is the CURRENT REAL-TIME DATA for the farmer:
 - Estimated Net Profit: ₹{profit}
 - Best Market to sell: {best_mandi} (Current Price: ₹{mandi.get('current_price', 0)}/Qtl)
 - Weather: {weather.get('temperature_c', 0)}°C, Rain Probability: {weather.get('rain_probability_percent', 0)}%
+- Temporal Arbitrage Analysis:
+  * Profit Today: ₹{context.get('net_realization_inr', 0)}
+  * Projected Profit in 48h (including Spoilage): ₹{context.get('profit_forecast_48h', 0)}
+  * Difference: ₹{context.get('decay_metrics', {}).get('profit_difference', 0)}
 {f"CRITICAL: The farmer has MANUALLY CALIBRATED the environmental data ({context.get('manual_override_count')} overrides). Trust the farmer's ground truth over the sensors. Acknowledge this in your opening." if context.get('is_manual_override') else ""}
 
 """
