@@ -1,0 +1,117 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const pathname = usePathname();
+    const { t } = useLanguage();
+
+    // Since we need "Strategy", "Market Maps", "Agri-Vakeel", let's use translated keys if possible, or fallback
+    // We'll add these keys to translations later
+    const navItems = [
+        {
+            name: 'Strategy',
+            href: '/dashboard',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            )
+        },
+        {
+            name: 'Market Maps',
+            href: '/dashboard/market-maps',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            )
+        },
+        {
+            name: 'Agri-Vakeel',
+            href: '/dashboard/agri-vakeel',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                </svg>
+            )
+        }
+    ];
+
+    return (
+        <div className="flex h-screen overflow-hidden bg-[#1B3022] text-white">
+            {/* Desktop Sidebar */}
+            <aside className="hidden md:flex flex-col w-64 border-r border-white/20 bg-black/20 backdrop-blur-xl">
+                <div className="p-6 flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center border border-white/10 shadow-inner">
+                        <span className="text-mint font-bold text-lg">M</span>
+                    </div>
+                    <span className="text-xl font-bold tracking-tight text-white"><span className="text-mint">Mitti</span>Mitra</span>
+                </div>
+
+                <nav className="flex-1 px-4 py-4 space-y-2">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive
+                                        ? 'bg-mint/10 text-mint border border-mint/20 shadow-[0_0_15px_rgba(32,255,189,0.1)]'
+                                        : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent'
+                                    }`}
+                            >
+                                {item.icon}
+                                <span className="font-medium">{item.name}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+
+                <div className="p-4 border-t border-white/10">
+                    <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-mint to-teal-500 flex items-center justify-center text-forest font-bold text-sm">
+                            VS
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium">Vikram Singh</p>
+                            <p className="text-xs text-gray-400">Pro Farmer</p>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            {/* Mobile Bottom Bar (Optional, simpler implementation for now) */}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-t border-white/10 flex justify-around p-3 pb-safe">
+                {navItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href}
+                            className={`flex flex-col items-center space-y-1 p-2 rounded-lg ${isActive ? 'text-mint' : 'text-gray-400'
+                                }`}
+                        >
+                            {item.icon}
+                            <span className="text-[10px] font-medium">{item.name}</span>
+                        </Link>
+                    )
+                })}
+            </div>
+
+            {/* Main Content Area */}
+            <main className="flex-1 relative overflow-y-auto overflow-x-hidden min-h-screen pb-20 md:pb-0">
+                {/* Background light glare effect */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-mint/5 rounded-full blur-[120px] -mr-40 -mt-20 pointer-events-none"></div>
+                {/* Render page content */}
+                {children}
+            </main>
+        </div>
+    );
+}

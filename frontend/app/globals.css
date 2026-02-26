@@ -5,6 +5,8 @@
   --color-mint: #20FFBD;
   --color-glass-border: rgba(255, 255, 255, 0.2);
   --color-glass-bg: rgba(255, 255, 255, 0.1);
+  --font-sans: "Helvetica", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Apple Garamond", "EB Garamond", Garamond, serif;
 }
 
 :root {

@@ -5,6 +5,8 @@ import { auth } from '@/services/firebase';
 import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from 'firebase/auth';
 import { GlassCard } from '@/components/glass-card';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function LoginPage() {
     const [phone, setPhone] = useState('');
@@ -15,6 +17,7 @@ export default function LoginPage() {
     const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
     const router = useRouter();
+    const { t } = useLanguage();
 
     useEffect(() => {
         // Initialize reCAPTCHA verifier on component mount
@@ -38,10 +41,18 @@ export default function LoginPage() {
         setError('');
 
         if (phone.length < 10) {
-            setError('Please enter a valid 10-digit phone number.');
+            setError(t('invalidPhone'));
             setLoading(false);
             return;
         }
+
+        // --- DEVELOPER BYPASS ---
+        if (phone === '9999999999') {
+            setStep('OTP');
+            setLoading(false);
+            return;
+        }
+        // ------------------------
 
         try {
             const formattedPhone = `+91${phone}`;
@@ -68,32 +79,47 @@ export default function LoginPage() {
         setLoading(true);
         setError('');
 
-        if (!confirmationResult) {
-            setError('Session expired. Please request a new OTP.');
+        if (!confirmationResult && phone !== '9999999999') {
+            setError(t('sessionExpired'));
             setStep('PHONE');
             setLoading(false);
             return;
         }
 
         try {
-            const result = await confirmationResult.confirm(otp);
+            // --- DEVELOPER BYPASS ---
+            if (phone === '9999999999') {
+                if (otp === '123456') {
+                    router.push('/dashboard');
+                    return;
+                } else {
+                    throw new Error("Invalid Demo OTP");
+                }
+            }
+            // ------------------------
+
+            const result = await confirmationResult!.confirm(otp);
             if (result.user) {
                 // Redirect to onboarding or dashboard
                 router.push('/onboarding');
             }
         } catch (err: any) {
             console.error(err);
-            setError(err.message || 'Invalid OTP.');
+            setError(err.message || t('invalidOtp'));
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-4">
+        <div className="flex min-h-screen items-center justify-center p-4 relative">
+            <div className="absolute top-4 right-4 z-50">
+                <LanguageSwitcher />
+            </div>
+
             <GlassCard className="w-full max-w-md relative z-10">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-mint mb-2">KrishiAI</h1>
+                    <h1 className="text-3xl font-bold text-mint mb-2">MittiMitra</h1>
                     <p className="text-gray-300">Empowering Market Strategists</p>
                 </div>
 
@@ -109,14 +135,14 @@ export default function LoginPage() {
                 {step === 'PHONE' ? (
                     <form onSubmit={handleSendOtp} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-200">Phone Number</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-200">{t('phoneNumber')}</label>
                             <div className="flex">
                                 <span className="inline-flex items-center px-3 rounded-l-md border border-glass-border bg-glass-bg text-gray-300">
                                     +91
                                 </span>
                                 <input
                                     type="tel"
-                                    placeholder="Enter 10-digit number"
+                                    placeholder={t('enterPhone')}
                                     className="flex-1 block w-full rounded-none rounded-r-md border border-glass-border bg-glass-bg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-mint"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
@@ -128,16 +154,16 @@ export default function LoginPage() {
                             disabled={loading}
                             className="w-full bg-mint text-forest font-bold py-3 px-4 rounded-md transition-opacity hover:opacity-90 disabled:opacity-50"
                         >
-                            {loading ? 'Sending...' : 'Get OTP'}
+                            {loading ? t('sending') : t('getOtp')}
                         </button>
                     </form>
                 ) : (
                     <form onSubmit={handleVerifyOtp} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-gray-200">Enter OTP</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-200">{t('enterOtp')}</label>
                             <input
                                 type="text"
-                                placeholder="6-digit code"
+                                placeholder={t('enter6Digit')}
                                 className="block w-full rounded-md border border-glass-border bg-glass-bg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-mint text-center tracking-widest text-xl"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -148,7 +174,7 @@ export default function LoginPage() {
                             disabled={loading}
                             className="w-full bg-mint text-forest font-bold py-3 px-4 rounded-md transition-opacity hover:opacity-90 disabled:opacity-50"
                         >
-                            {loading ? 'Verifying...' : 'Verify & Login'}
+                            {loading ? t('verifying') : t('verifyLogin')}
                         </button>
                         <button
                             type="button"
@@ -159,7 +185,7 @@ export default function LoginPage() {
                             }}
                             className="w-full text-sm text-gray-300 hover:text-white mt-2"
                         >
-                            Change phone number
+                            {t('changeNumber')}
                         </button>
                     </form>
                 )}

@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "KrishiAI (AgriChain)",
+  title: "MittiMitra (AgriChain)",
   description: "The Temporal Arbitrage Engine for Farmers",
   manifest: "/manifest.json",
 };
@@ -18,8 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased bg-forest min-h-screen">
-        {children}
+      <body className="antialiased font-sans bg-forest min-h-screen overflow-x-hidden">
+        <LanguageProvider>
+          {children}
+        </LanguageProvider>
       </body>
     </html>
   );
