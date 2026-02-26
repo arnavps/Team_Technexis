@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useOfflineCache } from "@/hooks/useOfflineCache";
 
 interface VoiceAssistantProps {
     dashboardData: any; // The full response from /recommendation
@@ -13,6 +14,8 @@ export function VoiceAssistant({ dashboardData }: VoiceAssistantProps) {
     const [transcript, setTranscript] = useState("");
     const [response, setResponse] = useState("");
     const [language, setLanguage] = useState("Hindi");
+
+    const { isOnline, cachedData: cachedAiResponse, saveToCache } = useOfflineCache('last_ai_response', '');
 
     // Web Speech API references
     const recognitionRef = useRef<any>(null);
@@ -87,6 +90,14 @@ export function VoiceAssistant({ dashboardData }: VoiceAssistantProps) {
     const handleAskVakeel = async (query: string) => {
         if (!query.trim() || !dashboardData) return;
 
+        // If offline, provide the cached response or a default offline message
+        if (!isOnline) {
+            const offlineMsg = cachedAiResponse || "Internet connection lost. Please refer to the saved dashboard colors.";
+            setResponse(offlineMsg);
+            speakResponse(offlineMsg);
+            return;
+        }
+
         setIsThinking(true);
         try {
             const res = await fetch("http://localhost:8000/chat/explain", {
@@ -102,13 +113,16 @@ export function VoiceAssistant({ dashboardData }: VoiceAssistantProps) {
             if (res.ok) {
                 const data = await res.json();
                 setResponse(data.response);
+                saveToCache(data.response); // Cache the latest working response for offline resilience
                 speakResponse(data.response);
             } else {
                 setResponse("Maaf kijiye, server se connect nahi ho paya. (Sorry, couldn't connect to the server.)");
             }
         } catch (error) {
             console.error(error);
-            setResponse("Network error occurred.");
+            const fallback = cachedAiResponse || "Network error occurred.";
+            setResponse(fallback);
+            speakResponse(fallback);
         } finally {
             setIsThinking(false);
         }
@@ -152,8 +166,8 @@ export function VoiceAssistant({ dashboardData }: VoiceAssistantProps) {
                                     key={lang}
                                     onClick={() => setLanguage(lang)}
                                     className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${language === lang
-                                            ? 'bg-mint text-forest'
-                                            : 'bg-glass-bg border border-glass-border text-gray-300 hover:bg-white/5'
+                                        ? 'bg-mint text-forest'
+                                        : 'bg-glass-bg border border-glass-border text-gray-300 hover:bg-white/5'
                                         }`}
                                 >
                                     {lang}
@@ -201,8 +215,8 @@ export function VoiceAssistant({ dashboardData }: VoiceAssistantProps) {
                             <button
                                 onClick={toggleListen}
                                 className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
-                                        ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse'
-                                        : 'bg-mint text-forest shadow-[0_0_15px_rgba(32,255,189,0.2)] hover:scale-105'
+                                    ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse'
+                                    : 'bg-mint text-forest shadow-[0_0_15px_rgba(32,255,189,0.2)] hover:scale-105'
                                     }`}
                             >
                                 {isListening ? (

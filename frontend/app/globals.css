@@ -18,6 +18,8 @@ body {
 }
 
 .glass-panel {
+  background: var(--color-forest);
+  /* Solid fallback for older Androids */
   background: var(--color-glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);

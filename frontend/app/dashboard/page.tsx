@@ -7,43 +7,66 @@ import { ShockAlertBanner } from '@/components/shock-alert-banner';
 import { VoiceAssistant } from '@/components/voice-assistant';
 import { MandiTable } from './MandiTable';
 import { useGPS } from '@/hooks/useGPS';
+import { useOfflineCache } from '@/hooks/useOfflineCache';
 
 export default function DashboardPage() {
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const { location, requestLocation } = useGPS();
+    const { isOnline, cachedData, saveToCache } = useOfflineCache('dashboard_recommendation');
+
+    const fetchRecommendation = async (isDemo = false) => {
+        setLoading(true);
+        try {
+            if (!isOnline && cachedData && !isDemo) {
+                setData(cachedData);
+                setLoading(false);
+                return;
+            }
+
+            const payload = {
+                crop: "Tomato",
+                location: { lat: 18.5204, lng: 73.8567 }, // Mock Pune
+                yield_est_quintals: 50.0,
+                base_spoilage_rate: 0.05
+            };
+
+            const res = await fetch('http://localhost:8000/recommendation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const json = await res.json();
+
+                // Demo Mode Override logic
+                if (isDemo) {
+                    json.mandi_stats.current_price *= 0.6; // 40% drop
+                    json.mandi_stats.current_volume_quintals *= 3; // Massive spike
+                    json.status = "RED";
+                    json.shock_alert = {
+                        is_shock: true,
+                        message: "CRITICAL: Price crashed by 3.5σ below the 7-day average. Massive volume spike detected!",
+                        pivot_advice: "EMERGENCY: Sudden price crash detected. Redirecting you to the nearest cold storage to save your asset."
+                    };
+                }
+
+                setData(json);
+                saveToCache(json);
+            }
+        } catch (err) {
+            console.error("Failed to fetch recommendation", err);
+            // Fallback to cache if network fails while technically 'online'
+            if (cachedData) setData(cachedData);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        // In a real app, this would use the real GPS coordinates and crop from standard DB profile.
-        // Simulating the API call to our new Decision Engine endpoint for demonstration.
-        const fetchRecommendation = async () => {
-            try {
-                const payload = {
-                    crop: "Tomato",
-                    location: { lat: 18.5204, lng: 73.8567 }, // Mock Pune
-                    yield_est_quintals: 50.0,
-                    base_spoilage_rate: 0.05
-                };
-
-                const res = await fetch('http://localhost:8000/recommendation', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (res.ok) {
-                    const json = await res.json();
-                    setData(json);
-                }
-            } catch (err) {
-                console.error("Failed to fetch recommendation", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchRecommendation();
-    }, []);
+    }, [isOnline]); // Re-run when coming back online
 
     if (loading) {
         return (
@@ -87,11 +110,27 @@ export default function DashboardPage() {
             {/* Header */}
             <header className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white mb-1"><span className="text-mint">Mitti</span>Mitra</h1>
+                    <div className="flex items-center space-x-3">
+                        <h1 className="text-2xl font-bold tracking-tight text-white mb-1"><span className="text-mint">Mitti</span>Mitra</h1>
+                        {!isOnline && (
+                            <span className="bg-red-500/20 border border-red-500/50 text-red-400 text-xs px-2 py-0.5 rounded-full flex items-center">
+                                <span className="w-1.5 h-1.5 bg-red-400 rounded-full mr-1.5"></span>
+                                Offline Mode
+                            </span>
+                        )}
+                    </div>
                     <p className="text-sm text-gray-400">Temporal Arbitrage Engine</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-glass-bg border border-glass-border flex items-center justify-center text-mint font-bold">
-                    R
+                <div className="flex space-x-3 items-center">
+                    <button
+                        onClick={() => fetchRecommendation(true)}
+                        className="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-full transition-colors font-medium border-dashed"
+                    >
+                        Simulate Shock ⚡
+                    </button>
+                    <div className="w-10 h-10 rounded-full bg-glass-bg border border-glass-border flex items-center justify-center text-mint font-bold shadow-inner">
+                        R
+                    </div>
                 </div>
             </header>
 
