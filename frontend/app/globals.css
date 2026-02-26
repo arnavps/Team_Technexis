@@ -24,3 +24,30 @@ body {
   border: 0.5px solid var(--color-glass-border);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-shimmer {
+  transform: translateX(-100%);
+  animation: shimmer 2s infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
