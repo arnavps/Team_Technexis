@@ -27,6 +27,7 @@ const withPWA = withPWAInit({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  turbopack: {}, // disable turbopack errors due to next-pwa webpack integrations
 };
 
 export default withPWA(nextConfig);
