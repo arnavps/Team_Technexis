@@ -30,7 +30,11 @@ async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") ->
         crop = lang_defaults.get(language, "Tomato")
 
     # 1. ATTEMPT REAL UMANG e-NAM DATA FETCH
-    enam_data = await enam_client.get_agm_gps_min_max_model_price()
+    try:
+        enam_data = await enam_client.get_agm_gps_min_max_model_price()
+    except Exception as e:
+        logger.error(f"ENAM Client await failed: {e}")
+        enam_data = {"error": str(e)}
     
     # Check if the API call succeeded and returned real JSON data
     if not enam_data or "error" in enam_data:

@@ -47,7 +47,7 @@ async def get_harvest_recommendation(data: HarvestRequest):
     """
     try:
         # 1. Fetch Integration Data
-        weather_data = fetch_district_weather(data.location)
+        weather_data = await fetch_district_weather(data.location)
         mandi_response = await fetch_mandi_prices(data.crop, data.location, data.language)
         primary_mandi = mandi_response["primary"]
         regional_mandis = mandi_response["regional_options"]
@@ -73,6 +73,7 @@ async def get_harvest_recommendation(data: HarvestRequest):
         # 3. Spatial Profit Analysis (Map Logic)
         temp_today = weather_data["temperature_c"]
         humidity_today = weather_data["humidity_percent"]
+        soil_moisture_today = weather_data.get("soil_moisture_percent", 45.0) # Real satellite data
         
         # Calculate logistics and profit for ALL regional options
         spatial_profits = calculate_spatial_profit(
@@ -149,4 +150,6 @@ async def get_harvest_recommendation(data: HarvestRequest):
         return recommendation
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

@@ -35,8 +35,6 @@ class EnamClient:
                 response = await client.get(url)
                 response.raise_for_status()
                 data = response.json()
-                # Debug logging
-                # logger.info(f"e-NAM API Success: {endpoint}")
                 return data
         except httpx.HTTPStatusError as e:
             logger.error(f"e-NAM API Error [{e.response.status_code}] on {endpoint}")
@@ -49,31 +47,31 @@ class EnamClient:
     # 1. STRUCTURAL APIs (Long Cache - 24 Hours)
     # ------------------------------------------------------------------------
     
-    @cached(cache=LONG_CACHE)
+    # @cached(cache=LONG_CACHE)
     async def get_states_new(self) -> Dict[str, Any]:
         # 5. States New Web API
         return await self._fetch("getStatesNew", self.DEFAULT_TOKEN)
 
-    @cached(cache=LONG_CACHE)
+    # @cached(cache=LONG_CACHE)
     async def get_district_new(self) -> Dict[str, Any]:
         # 6. District New Web API
         # The user provided a slightly different token for district, handling parameter gracefully
         token = os.getenv("ENAM_DISTRICT_TOKEN", "qkNR1lrxxxDf2tHMU9wh")
         return await self._fetch("getDistrictNew", token)
 
-    @cached(cache=LONG_CACHE)
+    # @cached(cache=LONG_CACHE)
     async def get_apmc_new(self) -> Dict[str, Any]:
         # 7. APMC New Web API 
         token = os.getenv("ENAM_APMC_TOKEN", "qkNR1lrrtAxxxixxf2tHMU9wh")
         return await self._fetch("getApmcNew", token)
 
-    @cached(cache=LONG_CACHE)
+    # @cached(cache=LONG_CACHE)
     async def get_products_new(self) -> Dict[str, Any]:
         # 8. Products New Web API
         token = os.getenv("ENAM_PRODUCTS_TOKEN", "qkNR1lrrtAxxxxvnDf2tHMU9wh")
         return await self._fetch("getProductsNew", token)
 
-    @cached(cache=LONG_CACHE)
+    # @cached(cache=LONG_CACHE)
     async def get_commodity_grid_new(self) -> Dict[str, Any]:
         # 11. Commodity Grid New Web API
         token = os.getenv("ENAM_COMMODITY_GRID_TOKEN", "qkNR1lrrtxxxxDf2tHMU9wh")
@@ -83,19 +81,19 @@ class EnamClient:
     # 2. LIVE PRICING & MARKET APIs (Short Cache - 15 Mins)
     # ------------------------------------------------------------------------
 
-    @cached(cache=SHORT_CACHE)
+    # @cached(cache=SHORT_CACHE)
     async def get_mandi_info(self) -> Dict[str, Any]:
         # 4. Mandi Information Web API
         token = os.getenv("ENAM_MANDI_INFO_TOKEN", "qkNR1lrrxxxxnDf2tHMU9wh")
         return await self._fetch("getMandiInfoForMI", token)
 
-    @cached(cache=SHORT_CACHE)
+    # @cached(cache=SHORT_CACHE)
     async def get_gps_nearest_apmc(self) -> Dict[str, Any]:
         # 12. GPS Nearest APMC Web API
         token = os.getenv("ENAM_GPS_APMC_TOKEN", "qkNR1lrrxxxnDf2tHMU9wh")
         return await self._fetch("getGpsNearestApmc", token)
 
-    @cached(cache=SHORT_CACHE)
+    # @cached(cache=SHORT_CACHE)
     async def get_agm_gps_min_max_model_price(self) -> Dict[str, Any]:
         # 17. AgmGps Min Max Model Price Web API
         # This is strictly the most important endpoint for our Crop Shock Engine
@@ -106,13 +104,13 @@ class EnamClient:
     # 3. LIVE BID STREAMING (Short Cache - 15 Mins)
     # ------------------------------------------------------------------------
 
-    @cached(cache=SHORT_CACHE)
+    # @cached(cache=SHORT_CACHE)
     async def get_all_bids(self) -> Dict[str, Any]:
         # 21. All Bids Web API
         token = os.getenv("ENAM_ALL_BIDS_TOKEN", "qkNR1lrrxxxxvnDf2tHMU9wh")
         return await self._fetch("getAllBids", token)
 
-    @cached(cache=SHORT_CACHE)
+    # @cached(cache=SHORT_CACHE)
     async def get_bid_apmc(self) -> Dict[str, Any]:
         # 19. Bid APMC Web API
         token = os.getenv("ENAM_BID_APMC_TOKEN", "qkNR1lrrxxxxnDf2tHMU9wh")

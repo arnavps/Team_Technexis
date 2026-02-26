@@ -7,16 +7,17 @@ interface MetricsGridProps {
     onMetricClick: (metric: string, value: number, unit: string) => void;
 }
 
-export function MetricsGrid({ data }: MetricsGridProps) {
+export function MetricsGrid({ data, onMetricClick }: MetricsGridProps) {
     const { t } = useLanguage();
 
     if (!data) return null;
 
     // Derived metrics for UI
-    const temperature = data.weather?.temperature_c || 28; // Fallback to 28C
-    const humidity = data.weather?.humidity_percent || 65; // Fallback to 65%
-    const soilMoisture = data.weather?.soil_moisture || 40; // Mock 40%
-    const spoilageRisk = data.weather?.spoilage_risk || 15; // Mock 15% Risk
+    const temperature = data.weather?.temperature_c || 28;
+    const humidity = data.weather?.humidity_percent || 65;
+    const soilMoisture = data.weather?.soil_moisture_percent || 40;
+    const spoilageRisk = data.weather?.spoilage_risk || 15;
+    const isVerified = data.weather?.is_verified_env || false;
 
     return (
         <div className="grid grid-cols-2 gap-4">
@@ -32,7 +33,9 @@ export function MetricsGrid({ data }: MetricsGridProps) {
                 <p className="text-2xl font-bold text-white tracking-tight">{temperature}°C</p>
                 <div className="flex flex-col items-center">
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{t('temp')}</p>
-                    <p className="text-[8px] text-orange-400/50 uppercase font-bold tracking-tighter mt-1">Source: IMD Nowcast</p>
+                    <p className={`text-[8px] uppercase font-bold tracking-tighter mt-1 ${isVerified ? 'text-mint' : 'text-orange-400/50'}`}>
+                        {isVerified ? 'Source: Open-Meteo (Live)' : 'Source: IMD Nowcast'}
+                    </p>
                 </div>
             </div>
 
@@ -42,7 +45,9 @@ export function MetricsGrid({ data }: MetricsGridProps) {
                 <p className="text-2xl font-bold text-white tracking-tight">{humidity}%</p>
                 <div className="flex flex-col items-center">
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{t('humidity')}</p>
-                    <p className="text-[8px] text-blue-400/50 uppercase font-bold tracking-tighter mt-1">Source: IMD Nowcast</p>
+                    <p className={`text-[8px] uppercase font-bold tracking-tighter mt-1 ${isVerified ? 'text-mint' : 'text-blue-400/50'}`}>
+                        {isVerified ? 'Source: Open-Meteo (Live)' : 'Source: IMD Nowcast'}
+                    </p>
                 </div>
             </div>
 
@@ -58,7 +63,9 @@ export function MetricsGrid({ data }: MetricsGridProps) {
                 <p className="text-2xl font-bold text-white tracking-tight">{soilMoisture}%</p>
                 <div className="flex flex-col items-center">
                     <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1">{t('soilMoisture') || 'SOIL MOISTURE'}</p>
-                    <p className="text-[8px] text-teal-400/50 uppercase font-bold tracking-tighter mt-1">Source: Sensor Node #42</p>
+                    <p className={`text-[8px] uppercase font-bold tracking-tighter mt-1 ${isVerified ? 'text-mint' : 'text-teal-400/50'}`}>
+                        {isVerified ? 'Source: Satellite Data (Open-Meteo)' : 'Source: Sensor Node #42'}
+                    </p>
                 </div>
             </div>
 
