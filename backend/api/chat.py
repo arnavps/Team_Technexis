@@ -201,4 +201,7 @@ def text_to_speech_stream(text: str = Query(...), language: str = Query("English
         })
     
     except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"CRITICAL TTS FAILURE: {e}\n{error_trace}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -159,7 +159,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
     const [lastVoiceName, setLastVoiceName] = useState<string>("MittiMitra TTS Engine");
 
-    const speakResponse = (text: string) => {
+    const speakResponse = async (text: string) => {
         if (!text) return;
 
         if (audioRef.current) {
@@ -168,31 +168,40 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         }
 
         try {
-            // Use the GET endpoint for streaming audio - significantly faster than blob download
-            console.log(`DEBUG: Requesting TTS for ${text.length} chars in ${language}`);
-            const streamUrl = `/api/chat/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(language)}`;
-            const audio = new Audio(streamUrl);
-
-            audio.onerror = (e) => {
-                console.error("Audio streaming error:", e, audio.error);
-                setLastVoiceName(`Error: Audio stream failed`);
-            };
-
-            // Speed up Marathi audio playback slightly as the default gTTS voice is inherently slow
-            if (language === "Marathi") {
-                audio.playbackRate = 1.35;
-            }
-
-            audioRef.current = audio;
-
-            const playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.error("Autoplay prevented or streaming error:", error);
-                    // Fallback to manual interaction message if autoplay fails
+            if (text.length >= 500) {
+                // Use POST for long text to avoid URL limits
+                const res = await fetch(`/api/chat/tts`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, language })
                 });
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const audio = new Audio(url);
+                audio.onended = () => URL.revokeObjectURL(url);
+
+                audioRef.current = audio;
+                await audio.play();
+                setLastVoiceName(`MittiMitra Voice (${language}) - Extended Mode`);
+            } else {
+                // Use fast GET streaming for short text
+                const streamUrl = `/api/chat/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(language)}`;
+                const audio = new Audio(streamUrl);
+
+                audio.onerror = () => {
+                    const error = audio.error;
+                    console.error("Audio streaming error:", { code: error?.code, message: error?.message });
+                    setLastVoiceName(`Error: Stream failed (Code ${error?.code || '?'})`);
+                };
+
+                if (language === "Marathi") audio.playbackRate = 1.35;
+
+                audioRef.current = audio;
+                await audio.play();
+                setLastVoiceName(`MittiMitra Voice (${language}) - Streaming Mode`);
             }
-            setLastVoiceName(`MittiMitra Cloud Voice (${language}) - Streaming Mode`);
         } catch (err) {
             console.error("Error playing audio response", err);
         }

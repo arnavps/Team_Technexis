@@ -10,7 +10,9 @@ const withPWA = withPWAInit({
   workboxOptions: {
     runtimeCaching: [
       {
-        urlPattern: /^https?.*/,
+        urlPattern: ({ url }) => {
+          return !url.pathname.startsWith('/api/');
+        },
         handler: 'StaleWhileRevalidate',
         options: {
           cacheName: 'offlineCache',

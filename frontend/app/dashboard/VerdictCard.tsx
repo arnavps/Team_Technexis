@@ -4,10 +4,11 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface VerdictCardProps {
     data: any;
+    userCrop?: string;
     onExplain?: (query: string) => void;
 }
 
-export function VerdictCard({ data, onExplain }: VerdictCardProps) {
+export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
     const { t } = useLanguage();
 
     if (!data) return null;
@@ -39,6 +40,14 @@ export function VerdictCard({ data, onExplain }: VerdictCardProps) {
             )}
 
             <h2 className="text-gray-400 uppercase tracking-widest text-xs font-bold mb-6 z-10">{t('recommendation')}</h2>
+
+            {userCrop && (
+                <div className="z-10 mb-2">
+                    <span className="text-[10px] text-mint font-black border border-mint/30 px-3 py-1 rounded-full bg-mint/5 uppercase tracking-[0.2em]">
+                        {userCrop}
+                    </span>
+                </div>
+            )}
 
             <div className="z-10 w-full mb-8">
                 {data.status === 'GREEN' ? (

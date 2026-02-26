@@ -21,7 +21,9 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
     const [profileName, setProfileName] = useState('');
+    const [userCrop, setUserCrop] = useState('');
     const [vakeelQuery, setVakeelQuery] = useState('');
+    const [yieldEst, setYieldEst] = useState(50);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -31,10 +33,11 @@ export default function DashboardPage() {
                     import('@/services/firebase').then(async ({ auth }) => {
                         const { data } = await supabase
                             .from('profiles')
-                            .select('name')
+                            .select('name, crop')
                             .eq('phone', phone)
                             .single();
                         if (data?.name) setProfileName(data.name);
+                        if (data?.crop) setUserCrop(data.crop);
                     });
                 });
             } catch (error) {
@@ -56,10 +59,11 @@ export default function DashboardPage() {
     const { location, requestLocation } = useGPS();
     const { isOnline, cachedData, saveToCache } = useOfflineCache('dashboard_recommendation');
 
-    // Trigger re-calculation when overrides change locally
-    const recalculateWithOverrides = (currentData: any, newOverrides: Record<string, number>) => {
+    // Trigger re-calculation when overrides or yield change locally
+    const recalculateWithOverrides = (currentData: any, newOverrides: Record<string, number>, newYield?: number) => {
         if (!currentData) return;
         const updated = JSON.parse(JSON.stringify(currentData)); // Deep clone
+        const activeYield = newYield ?? yieldEst;
 
         // Mocking the backend logic for immediate UI response
         const tempKey = t('temp') || 'Temperature';
@@ -82,6 +86,12 @@ export default function DashboardPage() {
 
         updated.is_manual_override = true;
         updated.manual_override_count = Object.keys(newOverrides).length;
+
+        // Update totals based on yield
+        const perQuintal = updated.net_realization_inr_per_quintal || (updated.total_net_profit / (updated.yield_quintals || 50));
+        updated.total_net_profit = Math.round(perQuintal * activeYield);
+        updated.yield_quintals = activeYield;
+
         setData(updated);
     };
 
@@ -106,9 +116,9 @@ export default function DashboardPage() {
             }
 
             const payload = {
-                crop: "", // Send empty to force backend regional fallback
+                crop: userCrop || "", // Use saved profile crop, backend handles fallback if empty
                 location: { lat: 18.5204, lng: 73.8567 }, // Mock Pune
-                yield_est_quintals: 50.0,
+                yield_est_quintals: yieldEst,
                 base_spoilage_rate: 0.05,
                 language: language
             };
@@ -155,7 +165,7 @@ export default function DashboardPage() {
 
     useEffect(() => {
         fetchRecommendation();
-    }, [isOnline]);
+    }, [isOnline, userCrop]);
 
     if (loading) {
         return (
@@ -180,7 +190,14 @@ export default function DashboardPage() {
             {/* Header */}
             <header className="relative z-50 flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Decision Hub</h1>
+                    <div className="flex items-center space-x-3 mb-2">
+                        <h1 className="text-2xl font-bold tracking-tight text-white uppercase tracking-tighter">Decision Hub</h1>
+                        {userCrop && (
+                            <span className="bg-mint text-forest text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-[0_0_10px_rgba(32,255,189,0.3)]">
+                                {userCrop}
+                            </span>
+                        )}
+                    </div>
                     <div className="flex items-center space-x-3">
                         {!isOnline && (
                             <span className="bg-red-500/20 border border-red-500/50 text-red-400 text-xs px-2 py-0.5 rounded-full flex items-center">
@@ -227,7 +244,7 @@ export default function DashboardPage() {
                 <div className="lg:col-span-1 space-y-6">
 
                     {/* Main Verdict Card */}
-                    <VerdictCard data={data} onExplain={(q: string) => setVakeelQuery(q)} />
+                    <VerdictCard data={data} userCrop={userCrop} onExplain={(q: string) => setVakeelQuery(q)} />
 
                     {/* 4-Item Environmental Metrics Grid */}
                     <MetricsGrid
@@ -235,6 +252,37 @@ export default function DashboardPage() {
                         onMetricClick={handleMetricClick}
                         onExplain={(q: string) => setVakeelQuery(q)}
                     />
+
+                    {/* Yield Calibration Card */}
+                    <GlassCard className="p-6">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Yield Calibration</h3>
+                            <span className="text-mint font-mono font-bold text-xl">{yieldEst} Qtl</span>
+                        </div>
+                        <input
+                            type="range"
+                            min="1"
+                            max="500"
+                            step="1"
+                            value={yieldEst}
+                            onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                setYieldEst(val);
+                                recalculateWithOverrides(data, overrides, val);
+                            }}
+                            onMouseUp={() => fetchRecommendation()}
+                            onTouchEnd={() => fetchRecommendation()}
+                            className="w-full h-1.5 bg-mint/20 rounded-lg appearance-none cursor-pointer accent-mint mb-2"
+                        />
+                        <div className="flex justify-between text-[10px] text-gray-500 font-bold">
+                            <span>1 QTL</span>
+                            <span>TOTAL FIELD ESTIMATE</span>
+                            <span>500 QTL</span>
+                        </div>
+                        <p className="mt-4 text-[10px] text-gray-400 italic leading-relaxed">
+                            Adjust this slider to match your actual harvest volume. Total profit calculations will update instantly.
+                        </p>
+                    </GlassCard>
                 </div>
 
                 {/* Right Column - Deep Analytics */}
