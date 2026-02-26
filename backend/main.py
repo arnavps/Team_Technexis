@@ -89,13 +89,15 @@ async def get_harvest_recommendation(data: HarvestRequest):
         dist = primary_mandi["distance_km"]
         
         # Calculate for TODAY (Assume 2 hours shelf/transit time to primary)
+        estimated_transit_hours = 2.0
         profit_today = get_net_realization(
             market_price=primary_mandi["current_price"],
             crop_type=data.crop,
             distance_km=dist,
             temp_c=temp_today,
             humidity=humidity_today,
-            hours_to_market=2.0
+            hours_to_market=estimated_transit_hours,
+            yield_est=data.yield_est_quintals
         )
         
         # Calculate for 48 HOURS (Assume 50 hours shelf/transit time total)
@@ -108,7 +110,8 @@ async def get_harvest_recommendation(data: HarvestRequest):
             distance_km=dist,
             temp_c=temp_forecast_48h,
             humidity=humidity_today,
-            hours_to_market=50.0
+            hours_to_market=50.0,
+            yield_est=data.yield_est_quintals
         )
         
         # 4. Synthesize Final Recommendation & Routing Pivot

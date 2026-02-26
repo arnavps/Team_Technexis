@@ -29,6 +29,7 @@ def calculate_spatial_profit(
             temp_c=temp_c,
             humidity=humidity,
             hours_to_market=estimated_transit_hours,
+            yield_est=yield_est,
             transport_cost_per_km=mandi.get("transport_rate_per_km", 15.0)
         )
         

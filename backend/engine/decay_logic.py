@@ -7,22 +7,34 @@ def calculate_quality_loss(crop_type: str, temp: float, humidity: float, hours_p
     
     Q10 Calculation: Rate doubles every 10C.
     Formula: R2 = R1 * Q10^((T2-T1)/10)
-    Base condition: T1 = 20C, R1 = 0.5% loss per hour (baseline).
+    Base condition: T1 = 20C.
     """
     Q10 = 2.0
     T_BASE = 20.0
-    BASE_RATE = 0.005 # 0.5% per hour
+    
+    # Crop-specific baseline decay rates (loss per hour at 20C)
+    # Perishables lose quality fast; non-perishables are durable.
+    DECAY_RATES = {
+        "Tomato": 0.005,      # 0.5% per hour
+        "Onion": 0.001,       # 0.1% per hour
+        "Cotton": 0.00001,    # Virtually zero loss over days
+        "Wheat": 0.00002,     # Virtually zero loss over days
+        "Rice": 0.00002,
+        "Potato": 0.0005,
+    }
+    
+    # Default to Tomato (conservative) if unknown
+    base_rate = DECAY_RATES.get(crop_type.capitalize(), 0.005)
     
     # Standard Q10 exponential decay
     relative_rate = math.pow(Q10, (temp - T_BASE) / 10.0)
     
-    # High-temperature acceleration logic
-    # If temp > 30C, accelerate decay rate by 10% for every degree.
-    if temp > 30:
+    # High-temperature acceleration logic for perishables
+    if temp > 30 and base_rate > 0.0001:
         high_temp_multiplier = 1.0 + ((temp - 30) * 0.10)
         relative_rate *= high_temp_multiplier
         
-    quality_loss_pct = BASE_RATE * relative_rate * hours_passed
+    quality_loss_pct = base_rate * relative_rate * hours_passed
     
     # Cap loss at 1.0 (100%)
     return min(1.0, quality_loss_pct)
