@@ -21,6 +21,7 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
     const [profileName, setProfileName] = useState('');
+    const [vakeelQuery, setVakeelQuery] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -132,6 +133,12 @@ export default function DashboardPage() {
                         message: "CRITICAL: Price crashed by 3.5σ below the 7-day average. Massive volume spike detected!",
                         pivot_advice: "EMERGENCY: Sudden price crash detected. Redirecting you to the nearest cold storage to save your asset."
                     };
+                    // Mock a pivot mandi for the demo
+                    if (json.regional_options && json.regional_options.length > 1) {
+                        const pivot = json.regional_options[1];
+                        json.shock_alert.pivot_advice += ` Re-routing to ${pivot.mandi_name} (${roundVal(pivot.distance_km)}km).`;
+                        json.shock_alert.pivot_mandi = pivot;
+                    }
                 }
 
                 setData(json);
@@ -206,10 +213,10 @@ export default function DashboardPage() {
             </header>
 
             {/* Shock Alert Banner */}
-            {data?.shock_analysis?.z_score > 2 && (
+            {(data?.shock_alert?.is_shock || data?.shock_analysis?.z_score > 2) && (
                 <ShockAlertBanner
-                    message=""
-                    pivotAdvice=""
+                    message={data?.shock_alert?.message || 'High market volatility detected.'}
+                    pivotAdvice={data?.shock_alert?.pivot_advice || ''}
                 />
             )}
 
@@ -220,12 +227,13 @@ export default function DashboardPage() {
                 <div className="lg:col-span-1 space-y-6">
 
                     {/* Main Verdict Card */}
-                    <VerdictCard data={data} />
+                    <VerdictCard data={data} onExplain={(q: string) => setVakeelQuery(q)} />
 
                     {/* 4-Item Environmental Metrics Grid */}
                     <MetricsGrid
                         data={data}
                         onMetricClick={handleMetricClick}
+                        onExplain={(q: string) => setVakeelQuery(q)}
                     />
                 </div>
 
@@ -244,7 +252,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Floating Voice Assistant */}
-            <VoiceAssistant dashboardData={data} />
+            <VoiceAssistant dashboardData={data} initialQuery={vakeelQuery} />
 
             {/* Manual Override Modal */}
             <ManualOverrideModal

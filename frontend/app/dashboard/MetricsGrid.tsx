@@ -5,9 +5,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface MetricsGridProps {
     data: any;
     onMetricClick: (metric: string, value: number, unit: string) => void;
+    onExplain?: (query: string) => void;
 }
 
-export function MetricsGrid({ data, onMetricClick }: MetricsGridProps) {
+export function MetricsGrid({ data, onMetricClick, onExplain }: MetricsGridProps) {
     const { t } = useLanguage();
 
     if (!data) return null;
@@ -36,6 +37,14 @@ export function MetricsGrid({ data, onMetricClick }: MetricsGridProps) {
                     <p className={`text-[8px] uppercase font-bold tracking-tighter mt-1 ${isVerified ? 'text-mint' : 'text-orange-400/50'}`}>
                         {isVerified ? 'Source: Open-Meteo (Live)' : 'Source: IMD Nowcast'}
                     </p>
+                    {onExplain && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onExplain(`Explain how this temperature of ${temperature}°C affects my profit.`); }}
+                            className="mt-2 text-[8px] text-mint/50 hover:text-mint uppercase tracking-widest font-bold"
+                        >
+                            Explain
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -71,13 +80,20 @@ export function MetricsGrid({ data, onMetricClick }: MetricsGridProps) {
 
             {/* Spoilage Risk % */}
             <div className="rounded-2xl border border-white/10 bg-black/20 backdrop-blur-md p-4 flex flex-col items-center justify-center text-center shadow-inner hover:bg-white/5 transition-colors relative overflow-hidden group">
-                {/* Dynamically shade the background depending on risk severity */}
                 <div className={`absolute bottom-0 left-0 right-0 opacity-20 transition-all duration-500 ease-in-out group-hover:opacity-30 ${spoilageRisk > 30 ? 'bg-red-500' : spoilageRisk > 15 ? 'bg-yellow-400' : 'bg-mint'
                     }`} style={{ height: `${spoilageRisk}%` }}></div>
 
                 <svg className="w-8 h-8 text-red-400 mb-2 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 <p className="text-2xl font-bold text-white tracking-tight z-10">{spoilageRisk}%</p>
                 <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-1 z-10">{t('spoilageRisk') || 'SPOILAGE RISK'}</p>
+                {onExplain && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onExplain(`My spoilage risk is ${spoilageRisk}%, what should I do?`); }}
+                        className="z-10 mt-1 text-[8px] text-red-400/50 hover:text-red-400 uppercase tracking-widest font-bold"
+                    >
+                        Explain
+                    </button>
+                )}
             </div>
         </div>
     );

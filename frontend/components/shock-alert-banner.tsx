@@ -29,7 +29,7 @@ export function ShockAlertBanner({ message, pivotAdvice }: ShockAlertProps) {
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2">
                         <span className="text-blue-300 font-bold text-sm tracking-wide">Market Insight:</span>
-                        <span className="text-gray-300 text-sm">Sudden volume spike detected; recalculating best route...</span>
+                        <span className="text-gray-300 text-sm">{message || 'Sudden market volatility detected; recalculating best route...'}</span>
                     </div>
                 </div>
 

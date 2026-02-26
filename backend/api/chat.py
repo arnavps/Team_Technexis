@@ -32,11 +32,17 @@ def build_system_prompt(context: Dict[str, Any], language: str) -> str:
     """
     status = context.get("status", "UNKNOWN")
     best_mandi = context.get("best_mandi", "Unknown")
-    profit = context.get("net_realization_inr", 0)
+    total_profit = context.get("total_net_profit", 0)
+    per_quintal = context.get("net_realization_inr_per_quintal", 0)
+    yield_qtl = context.get("yield_quintals", 1) # Default to 1 to avoid div zero
     weather = context.get("weather", {})
     mandi = context.get("mandi_stats", {})
     shock = context.get("shock_alert", {})
     
+    # Calculate totals for the prompt to match dashboard
+    total_today = total_profit
+    total_48h = context.get('profit_forecast_48h', 0) * yield_qtl
+    total_diff = total_48h - total_today
     prompt = f"""You are the MittiMitra Agri-Vakeel, an expert, empathetic agricultural advisor for Indian farmers.
 You MUST respond ONLY in the following language: {language}.
 If the language is Hindi or Marathi or Telugu or Tamil or Gujarati or Punjabi:
@@ -67,13 +73,14 @@ If the language is English:
 
 Here is the CURRENT REAL-TIME DATA for the farmer:
 - Overall Recommendation Status: {status} (GREEN=Sell, YELLOW=Hold, RED=Wait/Danger)
-- Estimated Net Profit: ₹{profit}
+- Total Estimated Take-Home Profit (Today): ₹{total_today}
+- Net Realization value: ₹{per_quintal} per quintal
 - Best Market to sell: {best_mandi} (Current Price: ₹{mandi.get('current_price', 0)}/Qtl)
 - Weather: {weather.get('temperature_c', 0)}°C, Rain Probability: {weather.get('rain_probability_percent', 0)}%
-- Temporal Arbitrage Analysis:
-  * Profit Today: ₹{context.get('net_realization_inr', 0)}
-  * Projected Profit in 48h (including Spoilage): ₹{context.get('profit_forecast_48h', 0)}
-  * Difference: ₹{context.get('decay_metrics', {}).get('profit_difference', 0)}
+- Temporal Arbitrage Analysis (Risk vs Reward):
+  * Total Profit Today: ₹{total_today}
+  * Predicted Total Profit in 48h (after spoilage/rot): ₹{total_48h}
+  * Net Change if you wait: ₹{total_diff}
 {f"CRITICAL: The farmer has MANUALLY CALIBRATED the environmental data ({context.get('manual_override_count')} overrides). Trust the farmer's ground truth over the sensors. Acknowledge this in your opening." if context.get('is_manual_override') else ""}
 
 """
@@ -83,8 +90,9 @@ Here is the CURRENT REAL-TIME DATA for the farmer:
     prompt += """
 YOUR TASK:
 Explain the 'Sell vs Wait' recommendation to the farmer based ONLY on the data above.
-Do not just repeat the numbers. Explain the TRADE-OFFS.
-Keep the response UNDER 3 sentences and highly actionable. Be empathetic and build trust.
+Do not just repeat the numbers. Explain the TRADE-OFFS—specifically the balance between harvesting now to avoid spoilage versus waiting for a potential price peak.
+Compare the Total Profit Today vs the Predicted Profit in 48 hours clearly.
+The response should be concise enough for voice playback (around 4-5 sentences) but comprehensive enough to build institutional trust.
 """
     return prompt
 
@@ -110,7 +118,7 @@ def chat_explain(req: ChatRequest):
                 {"role": "user", "content": req.farmer_query or "Please explain my dashboard recommendation."}
             ],
             temperature=0.3, # Low temperature for factual consistency
-            max_tokens=150,
+            max_tokens=250, # Increased for complex multilingual sentences
         )
         
         reply = completion.choices[0].message.content
@@ -147,7 +155,10 @@ def text_to_speech(req: TTSRequest):
         return StreamingResponse(mp3_fp, media_type="audio/mpeg")
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        import traceback
+        error_msg = f"TTS Error: {str(e)}\n{traceback.format_exc()}"
+        print(error_msg)
+        raise HTTPException(status_code=500, detail=error_msg)
 
 @router.get("/tts")
 def text_to_speech_stream(text: str = Query(...), language: str = Query("English")):
@@ -168,15 +179,24 @@ def text_to_speech_stream(text: str = Query(...), language: str = Query("English
         
         target_lang = lang_map.get(language, "en")
         
+        print(f"DEBUG: TTS Request - Lang: {language} ({target_lang}), Text Length: {len(text)}")
+        if len(text) > 100:
+            print(f"DEBUG: Text Snippet: {text[:100]}...")
+        else:
+            print(f"DEBUG: Text Content: {text}")
+
         tts = gTTS(text=text, lang=target_lang, slow=False)
         
         mp3_fp = io.BytesIO()
         tts.write_to_fp(mp3_fp)
         mp3_fp.seek(0)
+        audio_content = mp3_fp.getvalue()
+        content_length = len(audio_content)
         
         # Stream the audio buffer directly to the browser
-        return StreamingResponse(mp3_fp, media_type="audio/mpeg", headers={
-            "Cache-Control": "public, max-age=31536000", # Cache heavily
+        return StreamingResponse(io.BytesIO(audio_content), media_type="audio/mpeg", headers={
+            "Cache-Control": "public, max-age=31536000",
+            "Content-Length": str(content_length),
             "Accept-Ranges": "bytes"
         })
     

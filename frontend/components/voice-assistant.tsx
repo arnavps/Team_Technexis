@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useOfflineCache } from "@/hooks/useOfflineCache";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface VoiceAssistantProps {
     dashboardData: any; // The full response from /recommendation
@@ -10,14 +11,32 @@ interface VoiceAssistantProps {
 }
 
 export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery = "" }: VoiceAssistantProps) {
+    const { language: globalLanguage } = useLanguage();
+
+    // Map context codes to backend names
+    const langCodeToName: Record<string, string> = {
+        en: "English",
+        hi: "Hindi",
+        mr: "Marathi",
+        te: "Telugu",
+        ta: "Tamil",
+        gu: "Gujarati",
+        pa: "Punjabi"
+    };
+
     const [isOpen, setIsOpen] = useState(isEmbedded);
     const [isListening, setIsListening] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
     const [transcript, setTranscript] = useState("");
     const [response, setResponse] = useState("");
-    const [language, setLanguage] = useState("Hindi");
+    const [language, setLanguage] = useState(langCodeToName[globalLanguage] || "Hindi");
     const [isSupported, setIsSupported] = useState(true);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+    // Sync with global language changes
+    useEffect(() => {
+        setLanguage(langCodeToName[globalLanguage] || "Hindi");
+    }, [globalLanguage]);
 
     const { isOnline, cachedData: cachedAiResponse, saveToCache } = useOfflineCache('last_ai_response', '');
 
@@ -27,6 +46,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
     useEffect(() => {
         if (initialQuery && !isThinking) {
+            setIsOpen(true); // Pop open the assistant immediately
             setTranscript(initialQuery);
             setResponse(""); // Clear previous response when a new suggestion is clicked
             handleAskVakeel(initialQuery);
@@ -139,7 +159,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
     const [lastVoiceName, setLastVoiceName] = useState<string>("MittiMitra TTS Engine");
 
-    const speakResponse = async (text: string) => {
+    const speakResponse = (text: string) => {
         if (!text) return;
 
         if (audioRef.current) {
@@ -148,42 +168,31 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         }
 
         try {
-            const backendUrl = `/api/chat/tts`;
-            const res = await fetch(backendUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    text: text,
-                    language: language
-                })
-            });
+            // Use the GET endpoint for streaming audio - significantly faster than blob download
+            console.log(`DEBUG: Requesting TTS for ${text.length} chars in ${language}`);
+            const streamUrl = `/api/chat/tts?text=${encodeURIComponent(text)}&language=${encodeURIComponent(language)}`;
+            const audio = new Audio(streamUrl);
 
-            if (res.ok) {
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const audio = new Audio(url);
+            audio.onerror = (e) => {
+                console.error("Audio streaming error:", e, audio.error);
+                setLastVoiceName(`Error: Audio stream failed`);
+            };
 
-                // Speed up Marathi audio playback slightly as the default gTTS voice is inherently slow
-                if (language === "Marathi") {
-                    audio.playbackRate = 1.35;
-                }
-
-                audioRef.current = audio;
-
-                audio.onended = () => {
-                    URL.revokeObjectURL(url);
-                };
-
-                const playPromise = audio.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(error => {
-                        console.error("Autoplay prevented by mobile browser:", error);
-                    });
-                }
-                setLastVoiceName(`MittiMitra Cloud Voice (${language})`);
-            } else {
-                console.error("Failed to generate TTS audio.");
+            // Speed up Marathi audio playback slightly as the default gTTS voice is inherently slow
+            if (language === "Marathi") {
+                audio.playbackRate = 1.35;
             }
+
+            audioRef.current = audio;
+
+            const playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error("Autoplay prevented or streaming error:", error);
+                    // Fallback to manual interaction message if autoplay fails
+                });
+            }
+            setLastVoiceName(`MittiMitra Cloud Voice (${language}) - Streaming Mode`);
         } catch (err) {
             console.error("Error playing audio response", err);
         }
@@ -277,10 +286,13 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 )}
 
                 {isThinking && (
-                    <div className="self-start py-2 px-4 flex items-center space-x-2">
-                        <div className="w-2 h-2 rounded-full bg-mint animate-bounce"></div>
-                        <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="self-start py-2 px-4 flex flex-col items-start space-y-1">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 rounded-full bg-mint animate-bounce"></div>
+                            <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span className="text-[10px] text-mint/60 uppercase tracking-widest font-bold">MittiMitra is finding an answer...</span>
                     </div>
                 )}
 

@@ -4,9 +4,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface VerdictCardProps {
     data: any;
+    onExplain?: (query: string) => void;
 }
 
-export function VerdictCard({ data }: VerdictCardProps) {
+export function VerdictCard({ data, onExplain }: VerdictCardProps) {
     const { t } = useLanguage();
 
     if (!data) return null;
@@ -61,6 +62,16 @@ export function VerdictCard({ data }: VerdictCardProps) {
                         </h3>
                         <p className="text-gray-300 font-medium text-lg">Volatility mapping active. Monitor conditions closely.</p>
                     </div>
+                )}
+
+                {onExplain && (
+                    <button
+                        onClick={() => onExplain("Explain why you recommended this action.")}
+                        className="mt-6 px-4 py-2 bg-mint/10 border border-mint/30 rounded-full text-xs font-bold text-mint hover:bg-mint hover:text-forest transition-all flex items-center space-x-2 mx-auto"
+                    >
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>ASK VAKEEL WHY</span>
+                    </button>
                 )}
             </div>
 
