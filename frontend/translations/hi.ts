@@ -72,5 +72,62 @@ export const hi = {
     offlineTitle: "PWA ऑफ़लाइन लचीलापन",
     offlineDesc: "खेत में काम करता है। जब आपका सिग्नल खो जाता है तो सर्विस वर्कर्स के माध्यम से डेटा और वॉयस प्रतिक्रियाओं को कैश करता है।",
     arbitrageTitle: "शुद्ध प्राप्ति एल्गोरिदम",
-    arbitrageDesc: "हम सिर्फ आपको मंडी की कीमतें नहीं दिखाते हैं। हम आपकी विशिष्ट GPS-आधारित परिवहन लागत में कटौती करते हैं और आपके सटीक शुद्ध लाभ की गणना करने के लिए पर्यावरणीय पेनाल्टी लागू करते हैं।"
+    arbitrageDesc: "हम सिर्फ आपको मंडी की कीमतें नहीं दिखाते हैं। हम आपकी विशिष्ट GPS-आधारित परिवहन लागत में कटौती करते हैं और आपके सटीक शुद्ध लाभ की गणना करने के लिए पर्यावरणीय पेनाल्टी लागू करते हैं।",
+
+    // Sidebar & Navigation
+    strategy: "रणनीति",
+    marketMaps: "मार्केट मैप्स",
+    accounts: "खाते",
+    proFarmer: "प्रो किसान",
+
+    // Market Maps Page
+    regionalAnalysis: "क्षेत्रीय बाजार विश्लेषण",
+    mandiName: "मंडी का नाम",
+    distance: "दूरी",
+    logiSpoilage: "परिवहन और खराबी",
+    takeHomeProfit: "शुद्ध लाभ",
+    noAlternatives: "कोई वैकल्पिक बाजार उपलब्ध नहीं है।",
+    warningSpoilage: "चेतावनी: अधिक खराब होने का प्रभाव",
+    optimalRoute: "इष्टतम मार्ग",
+    deadZone: "डेड ज़ोन",
+    activeReroute: "सक्रिय पुनर्मार्ग",
+    pivotingTo: "की ओर मुड़ना",
+    spatialProfitAnalysis: "स्थानिक लाभ विश्लेषण",
+    liveGPSTransitData: "लाइव GPS पारगमन डेटा",
+    evaluatingDestinations: "सभी क्षेत्रीय गंतव्यों का मूल्यांकन। हम बाजारों को केवल दूरी के आधार पर नहीं, बल्कि शुद्ध प्राप्ति के आधार पर रैंक करते हैं।",
+    routeOptimizationLogic: "मार्ग अनुकूलन तर्क",
+
+    // Accounts Page
+    accountFarmProfile: "खाता और फार्म प्रोफ़ाइल",
+    manageFarmData: "अपना फार्म डेटा प्रबंधित करें",
+    verified: "सत्यापित",
+    fullName: "पूरा नाम",
+    phoneWarning: "फ़ोन नंबर बदला नहीं जा सकता।",
+    primaryCrop: "प्राथमिक फसल",
+    landSizeAcres: "भूमि का आकार (एकड़)",
+    saveChanges: "परिवर्तन सहेजें",
+    updating: "अद्यतन किया जा रहा है...",
+    profileUpdated: "प्रोफ़ाइल सफलतापूर्वक अद्यतन की गई!",
+    profileFailed: "प्रोफ़ाइल अद्यतन करने में विफल।",
+    select: "चुनें...",
+
+    // Agri Vakeel Page
+    askAgriVakeel: "कृषि-वकील से पूछें",
+    aiConsultation: "वॉयस AI परामर्श",
+    listening: "सुन रहा हूँ...",
+    processing: "संसाधित कर रहा है...",
+    stopAudio: "ऑडियो रोकें",
+    failedToConnect: "निर्णय इंजन से जुड़ने में विफल",
+    recommendationFetchError: "हम आपकी फसल की सिफारिशें प्राप्त नहीं कर सके। अपना नेटवर्क जांचें या पुनः प्रयास करें।",
+    retryConnection: "पुनः प्रयास करें",
+    suggestions: "सुझाव",
+    marketInsight: "बाजार अंतर्दृष्टि",
+    suggestion1Query: "नासिक में कीमतें क्यों गिर रही हैं?",
+    suggestion2Query: "क्या मुझे कटाई के लिए 2 दिन इंतजार करना चाहिए?",
+    weatherRisk: "मौसम जोखिम",
+    suggestion3Query: "क्या आज रात बारिश की संभावना है?",
+    arbitrage: "आर्बिट्रेज",
+    suggestion4Query: "कौन सी मंडी सबसे अधिक शुद्ध लाभ देती है?",
+    proTip: "प्रो टिप",
+    proTipDesc: "आप हिंदी या मराठी में बात कर सकते हैं। मैं स्वचालित रूप से आपकी भाषा का पता लगाऊंगा और तदनुसार प्रतिक्रिया दूंगा।"
 };

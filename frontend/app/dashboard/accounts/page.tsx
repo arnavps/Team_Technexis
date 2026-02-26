@@ -84,8 +84,8 @@ export default function AccountsPage() {
     return (
         <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
             <header className="relative z-50 flex flex-col mb-8">
-                <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Account & Farm Profile</h1>
-                <p className="text-sm text-gray-400">Manage your connected farm data</p>
+                <h1 className="text-2xl font-bold tracking-tight text-white mb-1">{t('accountFarmProfile')}</h1>
+                <p className="text-sm text-gray-400">{t('manageFarmData')}</p>
             </header>
 
             <GlassCard className="max-w-2xl">
@@ -98,14 +98,14 @@ export default function AccountsPage() {
                             <h2 className="text-xl font-bold text-white">{profile.name || 'User'}</h2>
                             <span className="text-sm font-mono text-gray-400">{profile.phone}</span>
                             <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                                Verified
+                                {t('verified')}
                             </span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">Full Name</label>
+                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">{t('fullName')}</label>
                             <input
                                 type="text"
                                 className="block w-full rounded-lg border border-white/10 bg-black/20 p-3 text-white focus:outline-none focus:ring-1 focus:ring-mint transition-colors"
@@ -115,24 +115,24 @@ export default function AccountsPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">Phone Number</label>
+                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">{t('phoneNumber')}</label>
                             <input
                                 type="text"
                                 disabled
                                 className="block w-full rounded-lg border border-white/5 bg-black/40 p-3 text-gray-500 cursor-not-allowed"
                                 value={profile.phone}
                             />
-                            <p className="text-[10px] text-gray-500 mt-1">Phone number cannot be changed.</p>
+                            <p className="text-[10px] text-gray-500 mt-1">{t('phoneWarning')}</p>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">Primary Crop</label>
+                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">{t('primaryCrop')}</label>
                             <select
                                 className="block w-full rounded-lg border border-white/10 bg-black/20 p-3 text-white focus:outline-none focus:ring-1 focus:ring-mint transition-colors custom-select"
                                 value={profile.crop}
                                 onChange={(e) => setProfile(prev => ({ ...prev, crop: e.target.value }))}
                             >
-                                <option value="" className="text-gray-900">Select...</option>
+                                <option value="" className="text-gray-900">{t('select')}</option>
                                 <option value="tomato" className="text-gray-900">Tomato</option>
                                 <option value="onion" className="text-gray-900">Onion</option>
                                 <option value="potato" className="text-gray-900">Potato</option>
@@ -140,7 +140,7 @@ export default function AccountsPage() {
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">Land Size (Acres)</label>
+                            <label className="text-sm font-medium text-gray-400 block uppercase tracking-wider text-[11px]">{t('landSizeAcres')}</label>
                             <input
                                 type="number"
                                 step="0.1"
@@ -157,7 +157,7 @@ export default function AccountsPage() {
                             disabled={saving}
                             className="bg-mint text-forest font-bold py-2.5 px-6 rounded-lg transition-all hover:bg-white hover:shadow-[0_0_15px_rgba(32,255,189,0.3)] disabled:opacity-50"
                         >
-                            {saving ? 'Updating...' : 'Save Changes'}
+                            {saving ? t('updating') : t('saveChanges')}
                         </button>
                     </div>
                 </form>

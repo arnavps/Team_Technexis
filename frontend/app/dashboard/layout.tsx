@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase/client';
 import { auth } from '@/services/firebase';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function DashboardLayout({
     children,
@@ -107,35 +108,45 @@ export default function DashboardLayout({
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-white/10">
+                <div className="p-4 border-t border-white/10 space-y-4">
+                    {/* Global Desktop Language Switcher */}
+                    <div className="flex">
+                        <LanguageSwitcher />
+                    </div>
                     <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center space-x-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-mint to-teal-500 flex items-center justify-center text-forest font-bold text-sm">
                             {profileName ? profileName.charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div>
-                            <p className="text-sm font-medium">{profileName || 'Farmer'}</p>
-                            <p className="text-xs text-gray-400">Pro Farmer</p>
+                            <p className="text-sm font-medium">{profileName || t('farmerLogin')}</p>
+                            <p className="text-xs text-gray-400">{t('proFarmer')}</p>
                         </div>
                     </div>
                 </div>
             </aside>
 
             {/* Mobile Bottom Bar (Optional, simpler implementation for now) */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-t border-white/10 flex justify-around p-3 pb-safe">
-                {navItems.map((item) => {
-                    const isActive = pathname === item.href;
-                    return (
-                        <Link
-                            key={item.name}
-                            href={item.href}
-                            className={`flex flex-col items-center space-y-1 p-2 rounded-lg ${isActive ? 'text-mint' : 'text-gray-400'
-                                }`}
-                        >
-                            {item.icon}
-                            <span className="text-[10px] font-medium">{item.name}</span>
-                        </Link>
-                    )
-                })}
+            <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-t border-white/10 flex flex-col pb-safe">
+                {/* Global Mobile Language Switcher (sits right above the nav icons) */}
+                <div className="flex justify-center py-2 border-b border-white/5 bg-black/60">
+                    <LanguageSwitcher />
+                </div>
+                <div className="flex justify-around p-3">
+                    {navItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.name}
+                                href={item.href}
+                                className={`flex flex-col items-center space-y-1 p-2 rounded-lg ${isActive ? 'text-mint' : 'text-gray-400'
+                                    }`}
+                            >
+                                {item.icon}
+                                <span className="text-[10px] font-medium">{t(item.name.toLowerCase().replace(/ \w/g, c => c[1].toUpperCase()).replace('-', '') as any) || item.name}</span>
+                            </Link>
+                        )
+                    })}
+                </div>
             </div>
 
             {/* Main Content Area */}

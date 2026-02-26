@@ -72,5 +72,62 @@ export const mr = {
     offlineTitle: "PWA ऑफलाइन कनेक्टिव्हिटी",
     offlineDesc: "शेतजमिनीत इंटरनेट नसतानाही काम करते. सिग्नल नसल्यास सर्व्हिस वर्कर्सच्या मदतीने डेटा आणि ऑडिओ सूचना कॅश करते.",
     arbitrageTitle: "निव्वळ प्राप्ती अल्गोरिदम",
-    arbitrageDesc: "आम्ही केवळ तुम्हाला मंडीच्या किमती दाखवत नाही. आम्ही तुमची अचूक GPS-आधारित वाहतूक खर्च वगळतो आणि नफ्याची वास्तविक गणना करण्यासाठी खराब वातावरणाचा दंड लागू करतो."
+    arbitrageDesc: "आम्ही केवळ तुम्हाला मंडीच्या किमती दाखवत नाही. आम्ही तुमची अचूक GPS-आधारित वाहतूक खर्च वगळतो आणि नफ्याची वास्तविक गणना करण्यासाठी खराब वातावरणाचा दंड लागू करतो.",
+
+    // Sidebar & Navigation
+    strategy: "धोरण",
+    marketMaps: "मार्केट नकाशे",
+    accounts: "खाती",
+    proFarmer: "प्रो शेतकरी",
+
+    // Market Maps Page
+    regionalAnalysis: "प्रादेशिक बाजार विश्लेषण",
+    mandiName: "मंडीचे नाव",
+    distance: "अंतर",
+    logiSpoilage: "वाहतूक आणि खराबी",
+    takeHomeProfit: "निव्वळ नफा",
+    noAlternatives: "कोणतेही पर्यायी बाजार उपलब्ध नाहीत.",
+    warningSpoilage: "चेतावणी: जास्त खराब होण्याचा प्रभाव",
+    optimalRoute: "इष्टतम मार्ग",
+    deadZone: "डेड झोन",
+    activeReroute: "सक्रिय पुनर्रचना",
+    pivotingTo: "कडे वळत आहे",
+    spatialProfitAnalysis: "स्थानिक नफा विश्लेषण",
+    liveGPSTransitData: "थेट GPS पारगमन डेटा",
+    evaluatingDestinations: "सर्व प्रादेशिक गंतव्यस्थानांचे मूल्यांकन करणे. आम्ही बाजारांना फक्त अंतराने नाही, तर परिपूर्ण निव्वळ प्राप्तीद्वारे रँक देतो.",
+    routeOptimizationLogic: "मार्ग ऑप्टिमायझेशन तर्क",
+
+    // Accounts Page
+    accountFarmProfile: "खाते आणि शेत प्रोफाइल",
+    manageFarmData: "तुमचा शेतीचा डेटा व्यवस्थापित करा",
+    verified: "सत्यापित",
+    fullName: "पूर्ण नाव",
+    phoneWarning: "फोन नंबर बदलता येत नाही.",
+    primaryCrop: "मुख्य पीक",
+    landSizeAcres: "जमिनीचा आकार (एकर)",
+    saveChanges: "बदल जतन करा",
+    updating: "अद्यतनित करत आहे...",
+    profileUpdated: "प्रोफाइल यशस्वीरित्या अद्यतनित केले!",
+    profileFailed: "प्रोफाइल अद्यतनित करण्यात अयशस्वी.",
+    select: "निवडा...",
+
+    // Agri Vakeel Page
+    askAgriVakeel: "कृषी-वकीलाला विचारा",
+    aiConsultation: "व्हॉइस AI सल्ला",
+    listening: "ऐकत आहे...",
+    processing: "प्रक्रिया करत आहे...",
+    stopAudio: "ऑडिओ थांबवा",
+    failedToConnect: "निर्णय इंजिनशी कनेक्ट करण्यात अयशस्वी",
+    recommendationFetchError: "आम्ही तुमच्या पिकाच्या शिफारसी मिळवू शकलो नाही. तुमचे नेटवर्क तपासा किंवा पुन्हा प्रयत्न करा.",
+    retryConnection: "पुन्हा प्रयत्न करा",
+    suggestions: "सूचना",
+    marketInsight: "बाजार अंतर्दृष्टी",
+    suggestion1Query: "नाशिकमध्ये भाव का पडत आहेत?",
+    suggestion2Query: "मी कापणीसाठी २ दिवस थांबू का?",
+    weatherRisk: "हवामान धोका",
+    suggestion3Query: "आज रात्री पाऊस पडण्याची शक्यता आहे का?",
+    arbitrage: "आर्बिट्रेज",
+    suggestion4Query: "कोणती मंडी सर्वाधिक निव्वळ नफा देते?",
+    proTip: "प्रो टिप",
+    proTipDesc: "तुम्ही हिंदी किंवा मराठीत बोलू शकता. मी आपोआप तुमची भाषा ओळखेन आणि त्यानुसार प्रतिसाद देईन."
 };

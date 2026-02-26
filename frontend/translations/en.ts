@@ -72,5 +72,62 @@ export const en = {
     offlineTitle: "PWA Offline Resilience",
     offlineDesc: "Works in the field. Caches data and voice responses via Service Workers when you lose signal.",
     arbitrageTitle: "The Net Realization Algorithm",
-    arbitrageDesc: "We don't just show you Mandi prices. We deduct your specific GPS-based transport cost and apply an environmental spoofing penalty to calculate your exact Net Take-Home Profit."
+    arbitrageDesc: "We don't just show you Mandi prices. We deduct your specific GPS-based transport cost and apply an environmental spoofing penalty to calculate your exact Net Take-Home Profit.",
+
+    // Sidebar & Navigation
+    strategy: "Strategy",
+    marketMaps: "Market Maps",
+    accounts: "Accounts",
+    proFarmer: "Pro Farmer",
+
+    // Market Maps Page
+    regionalAnalysis: "Regional Market Analysis",
+    mandiName: "Mandi Name",
+    distance: "Distance",
+    logiSpoilage: "Logistics & Spoilage",
+    takeHomeProfit: "Take-Home Profit",
+    noAlternatives: "No alternative markets available.",
+    warningSpoilage: "WARNING: High Spoilage Impact",
+    optimalRoute: "OPTIMAL ROUTE",
+    deadZone: "DEAD ZONE",
+    activeReroute: "Active Re-route",
+    pivotingTo: "Pivoting to",
+    spatialProfitAnalysis: "Spatial Profit Analysis",
+    liveGPSTransitData: "Live GPS Transit Data",
+    evaluatingDestinations: "Evaluating all regional destinations. We rank markets not by distance alone, but by absolute Net Realization (Market Price minus Logistics minus Heat Decay Spoilage).",
+    routeOptimizationLogic: "Route Optimization Logic",
+
+    // Accounts Page
+    accountFarmProfile: "Account & Farm Profile",
+    manageFarmData: "Manage your connected farm data",
+    verified: "Verified",
+    fullName: "Full Name",
+    phoneWarning: "Phone number cannot be changed.",
+    primaryCrop: "Primary Crop",
+    landSizeAcres: "Land Size (Acres)",
+    saveChanges: "Save Changes",
+    updating: "Updating...",
+    profileUpdated: "Profile updated successfully!",
+    profileFailed: "Failed to update profile.",
+    select: "Select...",
+
+    // Agri Vakeel Page
+    askAgriVakeel: "Ask Agri-Vakeel",
+    aiConsultation: "Voice AI Consultation",
+    listening: "Listening...",
+    processing: "Processing...",
+    stopAudio: "Stop Audio",
+    failedToConnect: "Failed to connect to the Decision Engine",
+    recommendationFetchError: "We couldn't fetch your harvest recommendations. Check your network or try again.",
+    retryConnection: "Retry Connection",
+    suggestions: "Suggestions",
+    marketInsight: "Market Insight",
+    suggestion1Query: "Why is nashik price dropping?",
+    suggestion2Query: "Should I wait 2 days to harvest?",
+    weatherRisk: "Weather Risk",
+    suggestion3Query: "Is there a rain spike tonight?",
+    arbitrage: "Arbitrage",
+    suggestion4Query: "Which mandi gives most net profit?",
+    proTip: "Pro Tip",
+    proTipDesc: "You can speak in Hindi or Marathi. I'll automatically detect your language and respond accordingly."
 };

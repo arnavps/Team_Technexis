@@ -8,12 +8,14 @@ import { useGPS } from '@/hooks/useGPS';
 import { useOfflineCache } from '@/hooks/useOfflineCache';
 
 export default function AgriVakeelPage() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const { location, requestLocation } = useGPS();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [initialQuery, setInitialQuery] = useState("");
-    const { isOnline, cachedData, saveToCache } = useOfflineCache('last_recommendation', null);
+    const { isOnline, cachedData: lastRecommendationCachedData, saveToCache } = useOfflineCache('last_recommendation', null);
+    const { cachedData: dashboardCachedData } = useOfflineCache('dashboard_recommendation');
+
 
     const fetchRecommendation = async (coords: { latitude: number, longitude: number }) => {
         try {
@@ -38,7 +40,7 @@ export default function AgriVakeelPage() {
             }
         } catch (err) {
             console.error("Failed to fetch recommendation", err);
-            if (cachedData) setData(cachedData);
+            if (lastRecommendationCachedData) setData(lastRecommendationCachedData);
         } finally {
             setLoading(false);
         }
@@ -69,13 +71,13 @@ export default function AgriVakeelPage() {
     if (!data && !loading) {
         return (
             <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
-                <div className="text-red-400 text-lg font-bold">Failed to connect to the Decision Engine</div>
-                <p className="text-gray-400 max-w-md">We couldn't fetch your harvest recommendations. Check your network or try again.</p>
+                <div className="text-red-400 text-lg font-bold">{t('failedToConnect')}</div>
+                <p className="text-gray-400 max-w-md">{t('recommendationFetchError')}</p>
                 <button
                     onClick={() => { setLoading(true); requestLocation(); }}
                     className="px-6 py-2 bg-mint text-forest rounded-full font-bold hover:bg-white transition-colors"
                 >
-                    Retry Connection
+                    {t('retryConnection')}
                 </button>
             </div>
         );
@@ -92,42 +94,42 @@ export default function AgriVakeelPage() {
     return (
         <div className="p-4 md:p-8 max-w-6xl mx-auto space-y-6 pb-24">
             <header className="relative z-50 flex flex-col mb-8">
-                <h1 className="text-2xl font-bold tracking-tight text-white mb-1">Agri-Vakeel AI</h1>
-                <p className="text-sm text-gray-400">Your Personal AI Agricultural Consultant</p>
+                <h1 className="text-2xl font-bold tracking-tight text-white mb-1">{t('askAgriVakeel')}</h1>
+                <p className="text-sm text-gray-400">{t('aiConsultation')}</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Left Column - Suggestions */}
                 <div className="md:col-span-1 space-y-4">
-                    <h2 className="text-white font-bold mb-2">Suggestions</h2>
+                    <h2 className="text-white font-bold mb-2">{t('suggestions')}</h2>
                     <div className="grid grid-cols-1 gap-4 w-full">
                         <button
-                            onClick={() => handleSuggestionClick("Why is nashik price dropping?")}
+                            onClick={() => handleSuggestionClick(t('suggestion1Query'))}
                             className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors w-full group"
                         >
-                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">Market Insight</p>
-                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"Why is nashik price dropping?"</p>
+                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">{t('marketInsight')}</p>
+                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"{t('suggestion1Query')}"</p>
                         </button>
                         <button
-                            onClick={() => handleSuggestionClick("Should I wait 2 days to harvest?")}
+                            onClick={() => handleSuggestionClick(t('suggestion2Query'))}
                             className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors w-full group"
                         >
-                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">Strategy</p>
-                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"Should I wait 2 days to harvest?"</p>
+                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">{t('strategy')}</p>
+                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"{t('suggestion2Query')}"</p>
                         </button>
                         <button
-                            onClick={() => handleSuggestionClick("Is there a rain spike tonight?")}
+                            onClick={() => handleSuggestionClick(t('suggestion3Query'))}
                             className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors w-full group"
                         >
-                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">Weather Risk</p>
-                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"Is there a rain spike tonight?"</p>
+                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">{t('weatherRisk')}</p>
+                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"{t('suggestion3Query')}"</p>
                         </button>
                         <button
-                            onClick={() => handleSuggestionClick("Which mandi gives most net profit?")}
+                            onClick={() => handleSuggestionClick(t('suggestion4Query'))}
                             className="p-4 rounded-2xl bg-white/5 border border-white/10 text-left hover:bg-white/10 transition-colors w-full group"
                         >
-                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">Arbitrage</p>
-                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"Which mandi gives most net profit?"</p>
+                            <p className="text-xs text-mint font-bold uppercase mb-1 group-hover:text-white transition-colors">{t('arbitrage')}</p>
+                            <p className="text-sm text-gray-300 italic group-hover:text-gray-100 transition-colors">"{t('suggestion4Query')}"</p>
                         </button>
                     </div>
                 </div>
@@ -148,7 +150,7 @@ export default function AgriVakeelPage() {
 
             <div className="flex justify-center mt-12 bg-white/5 border border-white/10 rounded-2xl p-6 max-w-2xl mx-auto">
                 <p className="text-gray-300 text-sm leading-relaxed text-center">
-                    <span className="text-mint font-bold">Pro Tip:</span> You can speak in <span className="text-white font-medium">Hindi</span> or <span className="text-white font-medium">Marathi</span>. I'll automatically detect your language and respond accordingly.
+                    <span className="text-mint font-bold">{t('proTip')}:</span> {t('proTipDesc')}
                 </p>
             </div>
         </div>

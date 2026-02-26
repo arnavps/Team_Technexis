@@ -10,7 +10,6 @@ import { useGPS } from '@/hooks/useGPS';
 import { useOfflineCache } from '@/hooks/useOfflineCache';
 import Image from 'next/image';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import { VerdictCard } from './VerdictCard';
 import { MetricsGrid } from './MetricsGrid';
 import { ManualOverrideModal } from '@/components/dashboard/ManualOverrideModal';
@@ -193,7 +192,6 @@ export default function DashboardPage() {
                     </div>
                 </div>
                 <div className="flex space-x-3 items-center">
-                    <LanguageSwitcher />
                     <button
                         onClick={() => fetchRecommendation(true)}
                         className="text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-full transition-colors font-medium border-dashed"
