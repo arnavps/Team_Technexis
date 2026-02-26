@@ -1,9 +1,9 @@
 import asyncio
 import json
-from integrations.enam_client import enam_client
+from integrations.mandi_api import fetch_mandi_prices
 
 async def test():
-    res = await enam_client.get_agm_gps_min_max_model_price()
+    res = await fetch_mandi_prices("cotton", {"lat": 18, "lng": 73}, "en")
     print(json.dumps(res, indent=2))
 
 if __name__ == "__main__":

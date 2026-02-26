@@ -1,0 +1,106 @@
+{
+    "updated_at": "2026-02-27T02:45:00Z",
+    "source": "Aggregated Search Snippets (CommodityOnline/Agmarknet)",
+    "commodities": {
+        "cotton": {
+            "modal_price": 7541.5,
+            "min_price": 6900.0,
+            "max_price": 7910.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Akola",
+                    "price": 8010.0
+                },
+                {
+                    "name": "Amravati",
+                    "price": 7525.0
+                },
+                {
+                    "name": "Jalna",
+                    "price": 7874.0
+                },
+                {
+                    "name": "Umred",
+                    "price": 7530.0
+                }
+            ]
+        },
+        "tomato": {
+            "modal_price": 1719.1,
+            "min_price": 150.0,
+            "max_price": 7200.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Nashik",
+                    "price": 1850.0
+                },
+                {
+                    "name": "Pune",
+                    "price": 1700.0
+                },
+                {
+                    "name": "Kolar",
+                    "price": 1600.0
+                }
+            ]
+        },
+        "onion": {
+            "modal_price": 1200.0,
+            "min_price": 1000.0,
+            "max_price": 2300.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Lasalgaon",
+                    "price": 1350.0
+                },
+                {
+                    "name": "Shimoga",
+                    "price": 2050.0
+                },
+                {
+                    "name": "Ankleshwar",
+                    "price": 1200.0
+                }
+            ]
+        },
+        "wheat": {
+            "modal_price": 2800.0,
+            "min_price": 2300.0,
+            "max_price": 3850.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Himatnagar",
+                    "price": 2800.0
+                },
+                {
+                    "name": "Shimoga",
+                    "price": 3675.0
+                },
+                {
+                    "name": "Indore",
+                    "price": 2950.0
+                }
+            ]
+        },
+        "rice": {
+            "modal_price": 2400.0,
+            "min_price": 2300.0,
+            "max_price": 8300.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Shimoga",
+                    "price": 2400.0
+                },
+                {
+                    "name": "Guntur",
+                    "price": 4500.0
+                }
+            ]
+        }
+    }
+}

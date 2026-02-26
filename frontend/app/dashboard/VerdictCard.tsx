@@ -69,10 +69,17 @@ export function VerdictCard({ data }: VerdictCardProps) {
                         <span className="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Net Realization Algorithm</span>
                         <div className="flex items-center space-x-2">
                             <span className="text-[8px] bg-mint/10 text-mint px-2 py-0.5 rounded-full font-bold border border-mint/20">LIVE CALCULATOR</span>
-                            <span className="text-[8px] flex items-center bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-black border border-blue-500/20 uppercase tracking-widest whitespace-nowrap">
-                                <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                                UMANG e-NAM Govt. Data
-                            </span>
+                            {data.mandi_stats?.is_verified_real ? (
+                                <span className="text-[8px] flex items-center bg-mint/20 text-mint px-2 py-0.5 rounded-full font-black border border-mint/40 uppercase tracking-widest animate-pulse">
+                                    <svg className="w-2.5 h-2.5 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944a11.954 11.954 0 007.834 3.055 1.001 1.001 0 01.839 1.144c-.161 1.063-.264 2.147-.305 3.245a11.954 11.954 0 01-1.637 5.518 11.949 11.949 0 01-4.78 4.782A11.91 11.91 0 0110 20a11.91 11.91 0 01-1.951-.157 11.95 11.95 0 01-4.78-4.782 11.954 11.954 0 01-1.637-5.518c-.041-1.098-.144-2.182-.305-3.245a1.001 1.001 0 01.839-1.144zM10 14a1 1 0 01-1-1v-1a1 1 0 112 0v1a1 1 0 01-1 1zm0-4a1 1 0 01-1-1V7a1 1 0 112 0v2a1 1 0 01-1 1z" clipRule="evenodd" /></svg>
+                                    Verified Real-Time (2026)
+                                </span>
+                            ) : (
+                                <span className="text-[8px] flex items-center bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-black border border-blue-500/20 uppercase tracking-widest whitespace-nowrap">
+                                    <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                                    UMANG e-NAM Govt. Hub
+                                </span>
+                            )}
                         </div>
                     </div>
                     <span className="text-mint font-mono font-bold text-2xl drop-shadow-[0_0_10px_rgba(32,255,189,0.3)]">
