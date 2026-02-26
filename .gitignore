@@ -1,4 +1,28 @@
+# API Keys & Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+services/firebase.ts
+
+# Node and Next.js
+node_modules/
+.next/
+out/
+build/
+.pnp.*
+.yarn/*
+
+# Python & FastAPI
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Custom markdown files 
 prd.md
 design_structure.md
 todo.md
-
