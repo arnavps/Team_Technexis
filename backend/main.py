@@ -20,7 +20,10 @@ app.add_middleware(
 )
 
 from api.chat import router as chat_router
+from api.user import router as user_router
+
 app.include_router(chat_router, prefix="/chat", tags=["AI Explanation"])
+app.include_router(user_router, prefix="/user", tags=["User Data Management"])
 
 class HarvestRequest(BaseModel):
     crop: str
