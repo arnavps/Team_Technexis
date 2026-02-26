@@ -49,6 +49,30 @@ export default function AccountsPage() {
         fetchProfile();
     }, []);
 
+    const handleDeleteData = async () => {
+        if (!window.confirm(t('confirmDelete' as any))) return;
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/user/purge`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone_number: profile.phone })
+            });
+
+            if (response.ok) {
+                alert(t('dataDeleted' as any));
+                await auth.signOut();
+                localStorage.removeItem('user_consent_dpdp');
+                window.location.href = '/login';
+            } else {
+                throw new Error("Failed to purge data");
+            }
+        } catch (error) {
+            console.error("Purge error:", error);
+            alert("Error: Could not complete erasure request.");
+        }
+    };
+
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
@@ -161,6 +185,21 @@ export default function AccountsPage() {
                         </button>
                     </div>
                 </form>
+            </GlassCard>
+
+            <GlassCard className="max-w-2xl border-red-500/20 bg-red-500/5">
+                <div className="p-2 space-y-4">
+                    <h3 className="text-sm font-bold text-red-400 uppercase tracking-widest">{t('deleteData' as any)}</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                        {t('deleteDataDescription' as any)}
+                    </p>
+                    <button
+                        onClick={handleDeleteData}
+                        className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold rounded-lg hover:bg-red-500 hover:text-white transition-all"
+                    >
+                        {t('deleteData' as any)}
+                    </button>
+                </div>
             </GlassCard>
         </div>
     );

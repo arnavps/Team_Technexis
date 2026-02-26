@@ -47,6 +47,26 @@ export function ConsentNotice() {
             { label: "GPS स्थान", desc: "जवळपासच्या मंड्या शोधण्यासाठी आणि स्थानिक हवामान अलर्ट देण्यासाठी." },
             { label: "फोन नंबर", desc: "सुरक्षित प्रमाणीकरण आणि खाते रिकव्हरीसाठी." },
             { label: "पीक निवड", desc: "वैयक्तिक कापणी आणि नफा धोरण देण्यासाठी." }
+        ],
+        te: [
+            { label: "GPS స్థానం", desc: "సమీపంలోని మండిలను కనుగొనడానికి మరియు స్థానిక వాతావరణ హెచ్చరికలను అందించడానికి." },
+            { label: "ఫోన్ నంబర్", desc: "సురక్షిత ప్రమాణీకరణ మరియు ఖాతా రికవరీ కోసం." },
+            { label: "పంట ఎంపిక", desc: "వ్యక్తిగతీకరించిన పంట మరియు లాభ వ్యూహాన్ని అందించడానికి." }
+        ],
+        ta: [
+            { label: "GPS இருப்பிடம்", desc: "அருகிலுள்ள மண்டிகளைக் கண்டறியவும் உள்ளூர் வானிலை விழிப்பூட்டல்களை வழங்கவும்." },
+            { label: "தொலைபேசி எண்", desc: "பாதுகாப்பான அங்கீகாரம் மற்றும் கணக்கு மீட்டெடுப்பிற்கு." },
+            { label: "பயிர் தேர்வு", desc: "தனிப்பயனாக்கப்பட்ட அறுவடை மற்றும் லாப உத்தியை வழங்க." }
+        ],
+        gu: [
+            { label: "GPS સ્થાન", desc: "નજીકની મંડીઓ શોધવા અને સ્થાનિક હવામાન ચેતવણીઓ આપવા માટે." },
+            { label: "ફોન નંબર", desc: "સુરક્ષિત પ્રમાણીકરણ અને એકાઉન્ટ પુનઃપ્રાપ્તિ માટે." },
+            { label: "પાક પસંદગી", desc: "વ્યક્તિગત લણણી અને નફાની વ્યૂહરચના પૂરી પાડવા માટે." }
+        ],
+        pa: [
+            { label: "GPS ਸਥਾਨ", desc: "ਨੇੜਲੀ ਮੰਡੀਆਂ ਲੱਭਣ ਅਤੇ ਸਥਾਨਕ ਮੌਸਮ ਸੰਬੰਧੀ ਅਲਰਟ ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ।" },
+            { label: "ਫੋਨ ਨੰਬਰ", desc: "ਸੁਰੱਖਿਅਤ ਪ੍ਰਮਾਣਿਕਤਾ ਅਤੇ ਖਾਤਾ ਰਿਕਵਰੀ ਲਈ।" },
+            { label: "ਫਸਲ ਦੀ ਚੋਣ", desc: "ਨਿੱਜੀ ਵਾਢੀ ਅਤੇ ਮੁਨਾਫਾ ਰਣਨੀతి ਪ੍ਰਦਾਨ ਕਰਨ ਲਈ।" }
         ]
     };
 
@@ -59,12 +79,20 @@ export function ConsentNotice() {
                     <h2 className="text-2xl font-bold text-white mb-2">
                         {language === 'mr' ? "डेटा संमती आणि गोपनीयता" :
                             language === 'hi' ? "डेटा सहमति और गोपनीयता" :
-                                "Data Consent & Privacy"}
+                                language === 'te' ? "డేటా సమ్మతి & గోప్యత" :
+                                    language === 'ta' ? "தரவு ஒப்புதல் & தனியுரிமை" :
+                                        language === 'gu' ? "ડેટા સંમતિ અને ગોપ્યતા" :
+                                            language === 'pa' ? "ਡਾਟਾ ਸਹਿਮਤੀ ਅਤੇ ਗੋਪਨੀਯਤਾ" :
+                                                "Data Consent & Privacy"}
                     </h2>
                     <p className="text-gray-400 text-sm">
                         {language === 'mr' ? "DPDP कायदा २०२३ नुसार, आम्हाला तुमची संमती आवश्यक आहे." :
                             language === 'hi' ? "DPDP अधिनियम 2023 के अनुसार, हमें आपकी सहमति की आवश्यकता है।" :
-                                "In compliance with DPDP Act 2023, we require your informed consent to process your data."}
+                                language === 'te' ? "DPDP చట్టం 2023 ప్రకారం, మాకు మీ సమ్మతి అవసరం." :
+                                    language === 'ta' ? "DPDP சட்டம் 2023 இன் படி, எங்களுக்கு உங்கள் ஒப்புதல் தேவை." :
+                                        language === 'gu' ? "DPDP એક્ટ 2023 મુજબ, અમને તમારી સંમતિની જરૂર છે." :
+                                            language === 'pa' ? "DPDP ਐਕਟ 2023 ਦੇ ਅਨੁਸਾਰ, ਸਾਨੂੰ ਤੁਹਾਡੀ ਸਹਿਮਤੀ ਦੀ ਲੋੜ ਹੈ।" :
+                                                "In compliance with DPDP Act 2023, we require your informed consent to process your data."}
                     </p>
                 </header>
 
@@ -87,13 +115,25 @@ export function ConsentNotice() {
                         onClick={handleAccept}
                         className="flex-1 px-6 py-3 bg-mint text-forest font-bold rounded-2xl hover:bg-white transition-all shadow-[0_0_20px_rgba(32,255,189,0.2)]"
                     >
-                        {language === 'mr' ? "संमत आहे" : language === 'hi' ? "स्वीकार करें" : "I Accept"}
+                        {language === 'mr' ? "संमत आहे" :
+                            language === 'hi' ? "स्वीकार करें" :
+                                language === 'te' ? "అంగీకరిస్తున్నాను" :
+                                    language === 'ta' ? "ஏற்றுக்கொள்கிறேன்" :
+                                        language === 'gu' ? "સ્વીકારો" :
+                                            language === 'pa' ? "ਮੈਂ ਸਵੀਕਾਰ ਕਰਦਾ ਹਾਂ" :
+                                                "I Accept"}
                     </button>
                     <button
                         onClick={handleDecline}
                         className="flex-1 px-6 py-3 bg-white/5 border border-white/10 text-gray-400 font-bold rounded-2xl hover:bg-red-500/20 hover:text-red-400 transition-all"
                     >
-                        {language === 'mr' ? "नाकारले" : language === 'hi' ? "अस्वीकार" : "Decline"}
+                        {language === 'mr' ? "नाकारले" :
+                            language === 'hi' ? "अस्वीकार" :
+                                language === 'te' ? "నిరాకరించు" :
+                                    language === 'ta' ? "நிராகரி" :
+                                        language === 'gu' ? "અસ્વીકાર" :
+                                            language === 'pa' ? "ਅਸਵੀਕਾਰ" :
+                                                "Decline"}
                     </button>
                 </div>
 

@@ -129,5 +129,10 @@ export const en = {
     arbitrage: "Arbitrage",
     suggestion4Query: "Which mandi gives most net profit?",
     proTip: "Pro Tip",
-    proTipDesc: "You can speak in Hindi or Marathi. I'll automatically detect your language and respond accordingly."
+    proTipDesc: "You can speak in Hindi or Marathi. I'll automatically detect your language and respond accordingly.",
+    estimatedTakeHome: "Estimated Take-Home",
+    deleteData: "Delete My Data & Account",
+    deleteDataDescription: "Permanently erase all your farm data and logs in compliance with DPDP Act 2023.",
+    confirmDelete: "Are you sure you want to delete all your data? This action is irreversible.",
+    dataDeleted: "Your data has been permanently erased."
 };

@@ -14,13 +14,15 @@ export function VerdictCard({ data }: VerdictCardProps) {
     // Approximated Math Breakdown for UI
     const price = data.mandi_stats?.current_price || 0;
     const distanceKm = data.mandi_stats?.distance_km || 0;
-    const yieldQtl = 50; // standard 50 Quintals assumption for UI
-    const grossRevenue = price * yieldQtl;
-    const logistics = Math.round(distanceKm * 15); // ₹15 per km transport
-    const spoilagePenalty = Math.round(grossRevenue * 0.02); // 2% environmental penalty
+    const yieldQtl = data.yield_quintals || 50;
 
-    // We use actual returned net_realization if available, else fallback to formula
-    const finalProfit = data.net_realization_inr || (grossRevenue - logistics - spoilagePenalty);
+    const grossRevenue = price * yieldQtl;
+    const logistics = Math.round(distanceKm * 15); // ₹15 per km transport (Total for trip)
+    const spoilagePenalty = Math.round(grossRevenue * (data.mandi_stats?.quality_loss_pct || 0.02) / 100);
+
+    // Unit math
+    const totalTakeHome = data.total_net_profit || (grossRevenue - logistics - spoilagePenalty);
+    const perQuintalRealization = data.net_realization_inr_per_quintal || (totalTakeHome / yieldQtl);
 
     return (
         <div className="rounded-3xl border border-white/20 bg-black/20 backdrop-blur-xl p-8 lg:p-10 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
@@ -66,7 +68,7 @@ export function VerdictCard({ data }: VerdictCardProps) {
             <div className="z-10 w-full mt-4 bg-white/5 border border-white/10 rounded-3xl p-6 text-left group">
                 <div className="flex justify-between items-center mb-6 border-b border-white/10 pb-4">
                     <div>
-                        <span className="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">Net Realization Algorithm</span>
+                        <span className="text-xs uppercase tracking-widest text-gray-500 font-bold block mb-1">TOTAL ESTIMATED TAKE-HOME</span>
                         <div className="flex items-center space-x-2">
                             <span className="text-[8px] bg-mint/10 text-mint px-2 py-0.5 rounded-full font-bold border border-mint/20">LIVE CALCULATOR</span>
                             {data.mandi_stats?.is_verified_real ? (
@@ -77,13 +79,13 @@ export function VerdictCard({ data }: VerdictCardProps) {
                             ) : (
                                 <span className="text-[8px] flex items-center bg-blue-500/10 text-blue-400 px-2 py-0.5 rounded-full font-black border border-blue-500/20 uppercase tracking-widest whitespace-nowrap">
                                     <svg className="w-2.5 h-2.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-                                    UMANG e-NAM Govt. Hub
+                                    UMANG e-NAM Gov. Hub
                                 </span>
                             )}
                         </div>
                     </div>
                     <span className="text-mint font-mono font-bold text-2xl drop-shadow-[0_0_10px_rgba(32,255,189,0.3)]">
-                        ₹{(finalProfit).toLocaleString('en-IN')}
+                        ₹{(totalTakeHome).toLocaleString('en-IN')}
                     </span>
                 </div>
 
@@ -92,18 +94,18 @@ export function VerdictCard({ data }: VerdictCardProps) {
                     <div className="flex justify-between items-center text-gray-300">
                         <span className="flex items-center">
                             <span className="w-1.5 h-1.5 bg-mint rounded-full mr-2"></span>
-                            Gross Market Value
+                            Gross Market Value <span className="text-[10px] text-gray-500 ml-1">({yieldQtl} Qtl)</span>
                         </span>
                         <span className="text-white">+₹{(grossRevenue).toLocaleString('en-IN')}</span>
                     </div>
 
-                    {/* Item 2: Logistics */}
+                    {/* Logistics */}
                     <div className="flex items-start justify-between">
                         <div className="flex items-start">
                             <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 mr-2"></span>
                             <div>
-                                <span className="text-gray-300 block text-xs tracking-wider">Logistics</span>
-                                <span className="text-gray-500 text-[10px]">({Math.round(data?.mandi_stats?.distance_km * 10) / 10 || 0}km GPS Transit)</span>
+                                <span className="text-gray-300 block text-xs tracking-wider">Logistics (Total Trip)</span>
+                                <span className="text-gray-500 text-[10px]">({Math.round(distanceKm * 10) / 10 || 0}km GPS Transit)</span>
                             </div>
                         </div>
                         <span className="text-red-400 font-mono">- ₹{(logistics).toLocaleString('en-IN')}</span>
@@ -118,9 +120,15 @@ export function VerdictCard({ data }: VerdictCardProps) {
                         <span className="text-red-400/80">-₹{(spoilagePenalty).toLocaleString('en-IN')}</span>
                     </div>
 
-                    <div className="pt-4 border-t border-white/5 flex justify-between items-center bg-mint/5 -mx-6 px-6 -mb-6 rounded-b-3xl">
-                        <span className="text-xs text-mint/60 font-bold uppercase">Estimated Take-Home</span>
-                        <span className="text-white font-black text-lg">₹{(finalProfit).toLocaleString('en-IN')}</span>
+                    {/* Per Quintal Breakdown */}
+                    <div className="pt-4 mt-2 border-t border-white/10 flex justify-between items-center text-gray-500 italic">
+                        <span className="text-[10px] uppercase">Net Realization per Quintal</span>
+                        <span className="text-xs">₹{Math.round(perQuintalRealization).toLocaleString('en-IN')}/Qtl</span>
+                    </div>
+
+                    <div className="pt-4 border-t border-white/5 flex justify-between items-center bg-mint/5 -mx-6 px-6 -mb-6 rounded-b-3xl transition-all group-hover:bg-mint/10">
+                        <span className="text-xs text-mint/60 font-bold uppercase">{t('estimatedTakeHome') || 'Estimated Take-Home'}</span>
+                        <span className="text-white font-black text-xl">₹{(totalTakeHome).toLocaleString('en-IN')}</span>
                     </div>
                 </div>
             </div>

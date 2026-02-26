@@ -136,7 +136,9 @@ async def get_harvest_recommendation(data: HarvestRequest):
             
         recommendation = {
             "status": status,
-            "net_realization_inr": round(profit_today, 2),
+            "net_realization_inr_per_quintal": round(profit_today, 2),
+            "total_net_profit": round(profit_today * data.yield_est_quintals, 2),
+            "yield_quintals": data.yield_est_quintals,
             "profit_forecast_48h": round(profit_48h, 2),
             "best_mandi": f"{primary_mandi['name']} ({round(dist, 1)} km)",
             "weather": weather_data,

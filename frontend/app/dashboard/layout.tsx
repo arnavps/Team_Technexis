@@ -8,6 +8,8 @@ import { supabase } from '@/utils/supabase/client';
 import { auth } from '@/services/firebase';
 import { LanguageSwitcher } from '@/components/language-switcher';
 
+import { ConsentNotice } from '@/components/auth/ConsentNotice';
+
 export default function DashboardLayout({
     children,
 }: {
@@ -80,6 +82,7 @@ export default function DashboardLayout({
 
     return (
         <div className="flex h-screen overflow-hidden bg-[#1B3022] text-white">
+            <ConsentNotice />
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex flex-col w-64 border-r border-white/20 bg-black/20 backdrop-blur-xl">
                 <div className="p-6 flex items-center space-x-3">

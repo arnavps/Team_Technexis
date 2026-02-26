@@ -6,6 +6,7 @@ import { useGPS } from '@/hooks/useGPS';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabase/client';
 import { auth } from '@/services/firebase';
+import { fuzzLocation } from '@/utils/physics';
 
 export default function OnboardingPage() {
     const [name, setName] = useState('');
@@ -28,6 +29,9 @@ export default function OnboardingPage() {
             // Get user phone from Firebase, fallback to demo string
             const phone = auth.currentUser?.phoneNumber || "9999999999";
 
+            // DPDP Act 2023: Fuzz GPS before storing in permanent DB
+            const fuzzed = fuzzLocation(location.latitude, location.longitude);
+
             const { error } = await supabase
                 .from('profiles')
                 .upsert({
@@ -35,8 +39,8 @@ export default function OnboardingPage() {
                     name: name,
                     crop: crop,
                     land_size_acres: parseFloat(landSize),
-                    latitude: location.latitude,
-                    longitude: location.longitude
+                    latitude: fuzzed.latitude,
+                    longitude: fuzzed.longitude
                 });
 
             if (error) throw error;
