@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { GlassCard } from '@/components/glass-card';
 import { StatusPill } from '@/components/status-pill';
 import { ShockAlertBanner } from '@/components/shock-alert-banner';
+import { VoiceAssistant } from '@/components/voice-assistant';
 import { MandiTable } from './MandiTable';
 import { useGPS } from '@/hooks/useGPS';
 
@@ -195,6 +196,9 @@ export default function DashboardPage() {
                 </div>
 
             </div>
+
+            {/* Floating Voice Assistant */}
+            <VoiceAssistant dashboardData={data} />
         </div>
     );
 }
