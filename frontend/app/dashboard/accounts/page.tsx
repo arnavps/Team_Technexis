@@ -56,12 +56,12 @@ export default function AccountsPage() {
         try {
             const { error } = await supabase
                 .from('profiles')
-                .update({
+                .upsert({
+                    phone: profile.phone,
                     name: profile.name,
                     crop: profile.crop,
                     land_size_acres: parseFloat(profile.land_size_acres) || 0
-                })
-                .eq('phone', profile.phone);
+                });
 
             if (error) throw error;
             alert("Profile updated successfully!");

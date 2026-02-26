@@ -14,12 +14,35 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { VerdictCard } from './VerdictCard';
 import { MetricsGrid } from './MetricsGrid';
 import { ManualOverrideModal } from '@/components/dashboard/ManualOverrideModal';
+import { auth } from '@/services/firebase';
 
 export default function DashboardPage() {
     const { t } = useLanguage();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
+    const [profileName, setProfileName] = useState('');
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const phone = auth.currentUser?.phoneNumber || "9999999999";
+                import('@/utils/supabase/client').then(async ({ supabase }) => {
+                    import('@/services/firebase').then(async ({ auth }) => {
+                        const { data } = await supabase
+                            .from('profiles')
+                            .select('name')
+                            .eq('phone', phone)
+                            .single();
+                        if (data?.name) setProfileName(data.name);
+                    });
+                });
+            } catch (error) {
+                console.error("Failed to fetch profile in topbar");
+            }
+        };
+        fetchProfile();
+    }, []);
 
     // Manual Overrides State
     const [overrides, setOverrides] = useState<Record<string, number>>({});
@@ -178,7 +201,7 @@ export default function DashboardPage() {
                         {t('simulateShock')}
                     </button>
                     <div className="w-10 h-10 rounded-full bg-glass-bg border border-glass-border flex items-center justify-center text-mint font-bold shadow-inner">
-                        R
+                        {profileName ? profileName.charAt(0).toUpperCase() : 'U'}
                     </div>
                 </div>
             </header>

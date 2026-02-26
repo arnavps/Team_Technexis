@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/utils/supabase/client';
+import { auth } from '@/services/firebase';
 
 export default function DashboardLayout({
     children,
@@ -11,6 +14,27 @@ export default function DashboardLayout({
 }) {
     const pathname = usePathname();
     const { t } = useLanguage();
+    const [profileName, setProfileName] = useState('');
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const phone = auth.currentUser?.phoneNumber || "9999999999";
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('name')
+                    .eq('phone', phone)
+                    .single();
+
+                if (data?.name) {
+                    setProfileName(data.name);
+                }
+            } catch (error) {
+                console.error("Failed to fetch profile in layout");
+            }
+        };
+        fetchProfile();
+    }, []);
 
     // Since we need "Strategy", "Market Maps", "Agri-Vakeel", let's use translated keys if possible, or fallback
     // We'll add these keys to translations later
@@ -86,10 +110,10 @@ export default function DashboardLayout({
                 <div className="p-4 border-t border-white/10">
                     <div className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 flex items-center space-x-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-mint to-teal-500 flex items-center justify-center text-forest font-bold text-sm">
-                            VS
+                            {profileName ? profileName.charAt(0).toUpperCase() : 'U'}
                         </div>
                         <div>
-                            <p className="text-sm font-medium">Vikram Singh</p>
+                            <p className="text-sm font-medium">{profileName || 'Farmer'}</p>
                             <p className="text-xs text-gray-400">Pro Farmer</p>
                         </div>
                     </div>
