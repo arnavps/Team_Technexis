@@ -25,8 +25,8 @@ export default function AgriVakeelPage() {
                 yield_est_quintals: 50.0,
                 base_spoilage_rate: 0.05
             };
-
-            const backendUrl = `http://${window.location.hostname}:8000/recommendation`;
+            // Use the Next.js API proxy to avoid Mixed Content on mobile HTTPS
+            const backendUrl = `/api/recommendation`;
             const res = await fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -162,13 +162,24 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);
                 const audio = new Audio(url);
+
+                // Speed up Marathi audio playback slightly as the default gTTS voice is inherently slow
+                if (language === "Marathi") {
+                    audio.playbackRate = 1.35;
+                }
+
                 audioRef.current = audio;
 
                 audio.onended = () => {
                     URL.revokeObjectURL(url);
                 };
 
-                await audio.play();
+                const playPromise = audio.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(error => {
+                        console.error("Autoplay prevented by mobile browser:", error);
+                    });
+                }
                 setLastVoiceName(`MittiMitra Cloud Voice (${language})`);
             } else {
                 console.error("Failed to generate TTS audio.");

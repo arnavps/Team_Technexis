@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ConsentNotice } from "@/components/auth/ConsentNotice";
+import { ServiceWorkerKiller } from "@/components/ServiceWorkerKiller";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -23,6 +24,7 @@ export default function RootLayout({
       <body className="antialiased font-sans bg-forest min-h-screen overflow-x-hidden">
         <LanguageProvider>
           <ConsentNotice />
+          <ServiceWorkerKiller />
           {children}
         </LanguageProvider>
       </body>

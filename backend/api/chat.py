@@ -1,6 +1,6 @@
 import os
 import io
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import Dict, Any, List
@@ -137,16 +137,48 @@ def text_to_speech(req: TTSRequest):
         
         target_lang = lang_map.get(req.language, "en")
         
-        # Slow down Marathi audio for clarity based on farmer feedback
-        is_slow = req.language == "Marathi"
-        
-        tts = gTTS(text=req.text, lang=target_lang, slow=is_slow)
+        # Removed artificial slowdown for Marathi per farmer feedback
+        tts = gTTS(text=req.text, lang=target_lang, slow=False)
         
         mp3_fp = io.BytesIO()
         tts.write_to_fp(mp3_fp)
         mp3_fp.seek(0)
         
         return StreamingResponse(mp3_fp, media_type="audio/mpeg")
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/tts")
+def text_to_speech_stream(text: str = Query(...), language: str = Query("English")):
+    """
+    Sub-second GET endpoint for native HTML5 Audio streaming. 
+    Bypasses the need for Blob downloading on the frontend.
+    """
+    try:
+        lang_map = {
+            "English": "en",
+            "Hindi": "hi",
+            "Marathi": "mr",
+            "Telugu": "te",
+            "Tamil": "ta",
+            "Gujarati": "gu",
+            "Punjabi": "pa"
+        }
+        
+        target_lang = lang_map.get(language, "en")
+        
+        tts = gTTS(text=text, lang=target_lang, slow=False)
+        
+        mp3_fp = io.BytesIO()
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.seek(0)
+        
+        # Stream the audio buffer directly to the browser
+        return StreamingResponse(mp3_fp, media_type="audio/mpeg", headers={
+            "Cache-Control": "public, max-age=31536000", # Cache heavily
+            "Accept-Ranges": "bytes"
+        })
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

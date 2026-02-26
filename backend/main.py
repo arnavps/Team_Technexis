@@ -38,7 +38,7 @@ def health_check():
     return {"status": "ok", "message": "AgriChain backend is running."}
 
 @app.post("/recommendation")
-def get_harvest_recommendation(data: HarvestRequest):
+async def get_harvest_recommendation(data: HarvestRequest):
     """
     Core Decision Engine Endpoint.
     1. Fetches weather and mandi info.
@@ -48,7 +48,7 @@ def get_harvest_recommendation(data: HarvestRequest):
     try:
         # 1. Fetch Integration Data
         weather_data = fetch_district_weather(data.location)
-        mandi_response = fetch_mandi_prices(data.crop, data.location, data.language)
+        mandi_response = await fetch_mandi_prices(data.crop, data.location, data.language)
         primary_mandi = mandi_response["primary"]
         regional_mandis = mandi_response["regional_options"]
         
