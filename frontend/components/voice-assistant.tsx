@@ -16,6 +16,8 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     const [transcript, setTranscript] = useState("");
     const [response, setResponse] = useState("");
     const [language, setLanguage] = useState("Hindi");
+    const [isSupported, setIsSupported] = useState(true);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     const { isOnline, cachedData: cachedAiResponse, saveToCache } = useOfflineCache('last_ai_response', '');
 
@@ -24,52 +26,78 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     const synthRef = useRef<SpeechSynthesis | null>(null);
 
     useEffect(() => {
-        if (initialQuery && !response && !isThinking) {
+        if (initialQuery && !isThinking) {
             setTranscript(initialQuery);
+            setResponse(""); // Clear previous response when a new suggestion is clicked
             handleAskVakeel(initialQuery);
         }
     }, [initialQuery]);
 
+    const initRecognition = () => {
+        if (typeof window === "undefined") return;
+
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            setIsSupported(false);
+            return;
+        }
+
+        try {
+            if (recognitionRef.current) {
+                recognitionRef.current.onresult = null;
+                recognitionRef.current.onend = null;
+                recognitionRef.current.onerror = null;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            if (language === "Hindi") {
+                recognition.lang = "hi-IN";
+            } else if (language === "Marathi") {
+                recognition.lang = "mr-IN";
+            } else {
+                recognition.lang = "en-US";
+            }
+
+            recognition.onresult = (event: any) => {
+                const current = event.resultIndex;
+                const text = event.results[current][0].transcript;
+                setTranscript(text);
+                handleAskVakeel(text);
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error("Speech recognition error", event.error);
+                setIsListening(false);
+
+                if (event.error === 'not-allowed') {
+                    setErrorMsg("Microphone access denied.");
+                } else if (event.error === 'network') {
+                    setErrorMsg("Network error.");
+                } else {
+                    setErrorMsg(`Error: ${event.error}`);
+                }
+            };
+
+            recognitionRef.current = recognition;
+        } catch (e) {
+            console.error("Failed to initialize recognition", e);
+            setIsSupported(false);
+        }
+    };
+
     useEffect(() => {
-        // Initialize Speech Synthesis
         if (typeof window !== "undefined" && "speechSynthesis" in window) {
             synthRef.current = window.speechSynthesis;
         }
-
-        // Initialize Speech Recognition
-        if (typeof window !== "undefined") {
-            const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-            if (SpeechRecognition) {
-                recognitionRef.current = new SpeechRecognition();
-                recognitionRef.current.continuous = false;
-                recognitionRef.current.interimResults = false;
-
-                // Dynamically set language based on selection
-                if (language === "Hindi") {
-                    recognitionRef.current.lang = "hi-IN";
-                } else if (language === "Marathi") {
-                    recognitionRef.current.lang = "mr-IN";
-                } else {
-                    recognitionRef.current.lang = "en-US";
-                }
-
-                recognitionRef.current.onresult = (event: any) => {
-                    const current = event.resultIndex;
-                    const text = event.results[current][0].transcript;
-                    setTranscript(text);
-                    handleAskVakeel(text);
-                };
-
-                recognitionRef.current.onend = () => {
-                    setIsListening(false);
-                };
-
-                recognitionRef.current.onerror = (event: any) => {
-                    console.error("Speech recognition error", event.error);
-                    setIsListening(false);
-                };
-            }
-        }
+        initRecognition();
     }, [language]);
 
     const toggleListen = () => {
@@ -85,23 +113,52 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         }
     };
 
+    const [lastVoiceName, setLastVoiceName] = useState<string>("");
+
     const speakResponse = (text: string) => {
         if (!synthRef.current) return;
 
-        synthRef.current.cancel(); // Stop any current speech
+        synthRef.current.cancel();
         const utterance = new SpeechSynthesisUtterance(text);
 
-        // Try to find an appropriate voice
         const voices = synthRef.current.getVoices();
-        let targetLang = "hi-IN";
-        if (language === "Marathi") targetLang = "mr-IN";
-        if (language === "English") targetLang = "en-US";
+        let langCode = "hi-IN";
+        if (language === "Marathi") langCode = "mr-IN";
+        if (language === "English") langCode = "en-IN"; // Prefer Indian English for context
 
-        const voice = voices.find(v => v.lang.includes(targetLang) || v.lang.includes(targetLang.split('-')[0]));
+        // Strategy: Look for Google/Neural voices first as they are MUCH better
+        const getBestVoice = (code: string) => {
+            const matches = voices.filter(v => v.lang.includes(code) || v.lang.includes(code.split('-')[0]));
+            return matches.find(v => v.name.includes("Google") || v.name.includes("Neural")) || matches[0];
+        };
 
-        if (voice) utterance.voice = voice;
-        utterance.rate = 0.9; // Slightly slower for comprehension
+        let voice = getBestVoice(langCode);
 
+        // Fallback: If no Indian English, try US English
+        if (!voice && language === "English") {
+            voice = getBestVoice("en-US");
+        }
+
+        // Fallback for Marathi: If no Marathi voice, use Hindi Google voice
+        if (!voice && language === "Marathi") {
+            voice = getBestVoice("hi-IN");
+        }
+
+        if (voice) {
+            utterance.voice = voice;
+            setLastVoiceName(voice.name);
+        }
+
+        // Custom rates per language confirmed by user feedback
+        if (language === "Marathi") {
+            utterance.rate = 0.85; // Slow Marathi is clear
+        } else if (language === "Hindi") {
+            utterance.rate = 0.90; // Balanced Hindi rate
+        } else {
+            utterance.rate = 0.95; // English natural rate
+        }
+
+        utterance.pitch = 1.0;
         synthRef.current.speak(utterance);
     };
 
@@ -118,7 +175,8 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
         setIsThinking(true);
         try {
-            const res = await fetch("http://localhost:8000/chat/explain", {
+            const backendUrl = `http://${window.location.hostname}:8000/chat/explain`;
+            const res = await fetch(backendUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -219,7 +277,8 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
                 <button
                     onClick={toggleListen}
-                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${isListening
+                    disabled={!isSupported}
+                    className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${!isSupported ? 'bg-gray-600 cursor-not-allowed' : isListening
                         ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse'
                         : 'bg-mint text-forest shadow-[0_0_15px_rgba(32,255,189,0.2)] hover:scale-105'
                         }`}
@@ -235,10 +294,33 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                         </svg>
                     )}
                 </button>
-                <p className="text-gray-400 text-sm mt-4 font-medium">
-                    {isListening ? "Listening... Tap to stop" : "Tap to speak with Agri-Vakeel"}
+                <p className={`text-sm mt-4 font-medium transition-colors ${errorMsg ? 'text-red-400' : 'text-gray-400'}`}>
+                    {!isSupported
+                        ? "Voice not supported in this browser"
+                        : errorMsg
+                            ? errorMsg
+                            : isListening
+                                ? "Listening... Tap to stop"
+                                : "Tap to speak with Agri-Vakeel"}
                 </p>
+                {errorMsg && (
+                    <button
+                        onClick={() => { setErrorMsg(null); initRecognition(); }}
+                        className="text-xs text-mint underline mt-2 hover:text-white"
+                    >
+                        Try Again
+                    </button>
+                )}
             </div>
+
+            {/* Voice Engine Diagnostic (Subtle) */}
+            {lastVoiceName && (
+                <div className="mt-4 flex justify-center">
+                    <p className="text-[10px] text-white/20 font-mono tracking-tight uppercase">
+                        AI Engine: {lastVoiceName}
+                    </p>
+                </div>
+            )}
         </div>
     );
 

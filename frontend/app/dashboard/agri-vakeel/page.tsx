@@ -24,7 +24,8 @@ export default function AgriVakeelPage() {
                 base_spoilage_rate: 0.05
             };
 
-            const res = await fetch('http://localhost:8000/recommendation', {
+            const backendUrl = `http://${window.location.hostname}:8000/recommendation`;
+            const res = await fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -64,6 +65,21 @@ export default function AgriVakeelPage() {
     const handleSuggestionClick = (query: string) => {
         setInitialQuery(query);
     };
+
+    if (!data && !loading) {
+        return (
+            <div className="p-8 flex flex-col items-center justify-center text-center space-y-4">
+                <div className="text-red-400 text-lg font-bold">Failed to connect to the Decision Engine</div>
+                <p className="text-gray-400 max-w-md">We couldn't fetch your harvest recommendations. Check your network or try again.</p>
+                <button
+                    onClick={() => { setLoading(true); requestLocation(); }}
+                    className="px-6 py-2 bg-mint text-forest rounded-full font-bold hover:bg-white transition-colors"
+                >
+                    Retry Connection
+                </button>
+            </div>
+        );
+    }
 
     if (loading && !data) {
         return (

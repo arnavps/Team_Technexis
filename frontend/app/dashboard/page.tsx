@@ -37,7 +37,8 @@ export default function DashboardPage() {
                 base_spoilage_rate: 0.05
             };
 
-            const res = await fetch('http://localhost:8000/recommendation', {
+            const backendUrl = `http://${window.location.hostname}:8000/recommendation`;
+            const res = await fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
