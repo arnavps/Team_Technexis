@@ -1,4 +1,4 @@
-# KrishiAI 🌾
+# MittiMitra 🌾
 > The Temporal Arbitrage Engine: Empowering 146M Smallholders to Optimize the 72-Hour Harvest-to-Market Window.
 
 ## 📌 Problem Statement
@@ -30,7 +30,13 @@ Indian farmers lose ₹92,000 Crore annually due to post-harvest mistiming. This
 - **Net-Profit Ranking**: Ranks Mandis by *Price - (Fuel + Spoilage Risk)*.
 
 ## 🛠️ Tech Stack
-*(To be added)*
+- **Frontend**: Next.js 14+ (App Router), React, Tailwind CSS
+- **UI/UX**: Custom Glassmorphism design system (`#1B3022` & `#20FFBD`)
+- **PWA**: `next-pwa` for offline capabilities and caching
+- **Authentication**: Firebase Phone Auth with reCAPTCHA
+- **Backend**: FastAPI (Python) for ML/algorithm execution
+- **Database**: Supabase / Firebase structured storage
+- **AI**: Groq (Llama 3 70B) for instant multilingual voice responses
 
 ## 🏗️ Architecture & Logic Flow
 - **Ingestion**: Backend fetches hourly Mandi prices and gridded weather data.
@@ -39,7 +45,23 @@ Indian farmers lose ₹92,000 Crore annually due to post-harvest mistiming. This
 - **Interaction**: A Voice-to-Text AI clarifies trade-offs (e.g., "Storage Cost vs. Price Gain").
 
 ## 🧪 Installation & Setup
-*(To be added)*
+
+### Phase 1: Foundation (Current Status)
+We have successfully completed Phase 1: Foundation & Auth.
+
+**Frontend Setup**:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+**Backend Setup**:
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
 ## 🛡️ Data Privacy (DPDP Act 2023 Compliance)
 - **Consent-Driven**: Granular permission for GPS and sensor data.
