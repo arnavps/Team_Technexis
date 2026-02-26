@@ -50,7 +50,7 @@ export default function LandingPage() {
             <Link href="#impact" className="hover:text-mint transition-colors">{t('impact')}</Link>
           </div>
           <div className="flex items-center space-x-4">
-            <LanguageSwitcher />
+            <LanguageSwitcher direction="down" />
             <Link
               href="/login"
               className="px-5 py-2.5 rounded-full bg-white/5 border border-glass-border hover:bg-white/10 hover:border-mint/50 transition-all font-semibold backdrop-blur-md"

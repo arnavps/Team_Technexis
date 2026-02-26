@@ -112,7 +112,7 @@ export default function DashboardPage() {
                 language: language
             };
 
-            const backendUrl = `http://${window.location.hostname}:8000/recommendation`;
+            const backendUrl = `/api/recommendation`;
             const res = await fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

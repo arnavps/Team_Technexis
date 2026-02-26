@@ -105,19 +105,35 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         };
     }, [language]);
 
-    const toggleListen = () => {
+    const toggleListen = async () => {
         if (isListening) {
             recognitionRef.current?.stop();
             setIsListening(false);
         } else {
             setTranscript("");
             setResponse("");
+            setErrorMsg(null);
+
             if (audioRef.current) {
                 audioRef.current.pause();
                 audioRef.current.currentTime = 0;
             }
-            recognitionRef.current?.start();
-            setIsListening(true);
+
+            try {
+                // EXPLICITLY request microphone permission first to force mobile browsers to prompt
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // Immediately stop the stream, we just needed the permission granted for SpeechRecognition
+                    stream.getTracks().forEach(track => track.stop());
+                }
+
+                recognitionRef.current?.start();
+                setIsListening(true);
+            } catch (err) {
+                console.error("Microphone permission denied or not supported:", err);
+                setErrorMsg("Microphone access is required to use the Voice Assistant.");
+                setIsListening(false);
+            }
         }
     };
 
@@ -132,7 +148,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
         }
 
         try {
-            const backendUrl = `http://${window.location.hostname}:8000/chat/tts`;
+            const backendUrl = `/api/chat/tts`;
             const res = await fetch(backendUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -175,7 +191,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
         setIsThinking(true);
         try {
-            const backendUrl = `http://${window.location.hostname}:8000/chat/explain`;
+            const backendUrl = `/api/chat/explain`;
             const res = await fetch(backendUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },

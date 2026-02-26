@@ -3,7 +3,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useState, useRef, useEffect } from "react";
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ direction = "up" }: { direction?: "up" | "down" }) {
     const { language, setLanguage } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -44,7 +44,7 @@ export function LanguageSwitcher() {
             </button>
 
             {isOpen && (
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-32 bg-forest border border-glass-border rounded-xl shadow-lg shadow-black/50 overflow-hidden z-[100]">
+                <div className={`absolute left-1/2 -translate-x-1/2 ${direction === "up" ? "bottom-full mb-2" : "top-full mt-2"} w-32 bg-forest border border-glass-border rounded-xl shadow-lg shadow-black/50 overflow-hidden z-[100]`}>
                     {languages.map((lang) => (
                         <button
                             key={lang.code}
