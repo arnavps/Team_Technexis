@@ -41,6 +41,15 @@ export default function DashboardLayout({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                 </svg>
             )
+        },
+        {
+            name: 'Accounts',
+            href: '/dashboard/accounts',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+            )
         }
     ];
 
@@ -63,8 +72,8 @@ export default function DashboardLayout({
                                 key={item.name}
                                 href={item.href}
                                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                        ? 'bg-mint/10 text-mint border border-mint/20 shadow-[0_0_15px_rgba(32,255,189,0.1)]'
-                                        : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent'
+                                    ? 'bg-mint/10 text-mint border border-mint/20 shadow-[0_0_15px_rgba(32,255,189,0.1)]'
+                                    : 'text-gray-400 hover:bg-white/5 hover:text-gray-200 border border-transparent'
                                     }`}
                             >
                                 {item.icon}

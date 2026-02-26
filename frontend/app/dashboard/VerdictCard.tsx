@@ -87,13 +87,16 @@ export function VerdictCard({ data }: VerdictCardProps) {
                         <span className="text-white">+₹{(grossRevenue).toLocaleString('en-IN')}</span>
                     </div>
 
-                    {/* Logistics */}
-                    <div className="flex justify-between items-center text-gray-400 group-hover:text-gray-300 transition-colors">
-                        <span className="flex items-center">
-                            <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                            Logistics ({distanceKm}km)
-                        </span>
-                        <span className="text-red-400/80">-₹{(logistics).toLocaleString('en-IN')}</span>
+                    {/* Item 2: Logistics */}
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start">
+                            <span className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 mr-2"></span>
+                            <div>
+                                <span className="text-gray-300 block text-xs tracking-wider">Logistics</span>
+                                <span className="text-gray-500 text-[10px]">({Math.round(data?.mandi_stats?.distance_km * 10) / 10 || 0}km GPS Transit)</span>
+                            </div>
+                        </div>
+                        <span className="text-red-400 font-mono">- ₹{(logistics).toLocaleString('en-IN')}</span>
                     </div>
 
                     {/* Spoilage */}

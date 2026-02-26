@@ -4,21 +4,50 @@ import { useState } from 'react';
 import { GlassCard } from '@/components/glass-card';
 import { useGPS } from '@/hooks/useGPS';
 import { useRouter } from 'next/navigation';
+import { supabase } from '@/utils/supabase/client';
+import { auth } from '@/services/firebase';
 
 export default function OnboardingPage() {
+    const [name, setName] = useState('');
     const [crop, setCrop] = useState('');
     const [landSize, setLandSize] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
     const { location, error: gpsError, loading: gpsLoading, requestLocation } = useGPS();
     const router = useRouter();
 
-    const handleSaveProfile = (e: React.FormEvent) => {
+    const handleSaveProfile = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!crop || !landSize || !location) {
+        if (!name || !crop || !landSize || !location) {
             alert('Please fill all fields and grant GPS access.');
             return;
         }
-        // TODO: Save to Supabase profile associated with phone auth
-        router.push('/dashboard');
+
+        setIsSaving(true);
+
+        try {
+            // Get user phone from Firebase, fallback to demo string
+            const phone = auth.currentUser?.phoneNumber || "9999999999";
+
+            const { error } = await supabase
+                .from('profiles')
+                .upsert({
+                    phone: phone,
+                    name: name,
+                    crop: crop,
+                    land_size_acres: parseFloat(landSize),
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                });
+
+            if (error) throw error;
+            router.push('/dashboard');
+
+        } catch (error) {
+            console.error("Error saving profile:", error);
+            alert("Failed to save profile. Please try again.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -30,6 +59,17 @@ export default function OnboardingPage() {
 
             <GlassCard>
                 <form onSubmit={handleSaveProfile} className="space-y-6">
+                    <div>
+                        <label className="block text-sm font-medium mb-1 text-gray-200">Full Name</label>
+                        <input
+                            type="text"
+                            placeholder="e.g. Ramesh Patel"
+                            className="block w-full rounded-md border border-glass-border bg-glass-bg p-3 text-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-mint"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium mb-1 text-gray-200">Main Crop</label>
                         <select
@@ -78,9 +118,10 @@ export default function OnboardingPage() {
 
                     <button
                         type="submit"
-                        className="w-full bg-mint text-forest font-bold py-3 px-4 rounded-md transition-opacity hover:opacity-90 mt-8"
+                        disabled={isSaving}
+                        className="w-full bg-mint text-forest font-bold py-3 px-4 rounded-md transition-opacity hover:opacity-90 mt-8 disabled:opacity-50"
                     >
-                        Complete Setup
+                        {isSaving ? 'Saving...' : 'Complete Setup'}
                     </button>
                 </form>
             </GlassCard>
