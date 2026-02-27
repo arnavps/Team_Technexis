@@ -26,6 +26,14 @@ class TTSRequest(BaseModel):
     text: str
     language: str = "English"
 
+class OnboardingExtractRequest(BaseModel):
+    step: str
+    text_input: str
+    language: str = "English"
+    current_name: str = ""
+    current_crop: str = ""
+    current_land_size: float = 0.0
+
 def build_system_prompt(context: Dict[str, Any], language: str) -> str:
     """
     Injects the real-time dashboard data (prices, weather, shocks) into the AI prompt.
@@ -156,6 +164,82 @@ def chat_explain(req: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/onboarding_extract")
+def onboarding_extract(req: OnboardingExtractRequest):
+    """
+    Sub-second endpoint utilizing Groq + Llama 3 to structure unstructured voice input into JSON.
+    """
+    if not client:
+        return {
+            "consent_granted": True if "yes" in req.text_input.lower() else None,
+            "crop": "tomato" if "tomato" in req.text_input.lower() else None,
+            "yield_quintals": 150 if "150" in req.text_input else None,
+            "ai_reply": "Mock OK."
+        }
+
+    try:
+        if req.step == "Consent":
+            schema_instructions = """Return JSON with: {'consent_granted': true/false/null, 'ai_reply': 'string'}.
+EXTRACT CONSENT: 
+- Set consent_granted to true if they say ANY affirmative like "Yes", "同意", "जी", "हाँ", "अनुमति है", "ठीक है", "बिल्कुल" (Hindi) or "हो", "आहे", "हो आहे", "नक्कीच" (Marathi).
+- Set to false if they say no/nay.
+- 'ai_reply' MUST be a very short acknowledgement in """ + req.language + " script only."
+        elif req.step == "CropDetails":
+            schema_instructions = """Return JSON with: {'name': string/null, 'crop': string/null, 'land_size': number/null, 'ai_reply': 'string'}.
+- Extract person's name, crop name, and land size (acres).
+- Map regional crop names (e.g. 'Kanda', 'Batata', 'Soyabin') to English equivalents ('Onion', 'Potato', 'Soybean').
+- 'ai_reply' MUST be in """ + req.language + """ script.
+- If you have some info but not all (e.g. you have 5 acres but no crop), the 'ai_reply' MUST acknowledge the 5 acres and specifically ask for the missing crop."""
+        elif req.step == "FinalCalibration":
+             schema_instructions = "Return JSON with: {'yield_quintals': number/null, 'planting_date': 'YYYY-MM-DD'/null, 'ai_reply': 'string'}. Extract yield as number. 'ai_reply' MUST be in " + req.language + " script only."
+        else:
+             schema_instructions = "Return JSON with: {'ai_reply': 'string'}"
+
+        system_prompt = f"""You are the MittiMitra Agri-Vakeel Assistant. Your ONLY goal is to extract farmer data into JSON.
+
+CONTEXT OF ALREADY EXTRACTED DATA:
+- Name: {req.current_name or 'Unknown'}
+- Crop: {req.current_crop or 'Unknown'}
+- Land Size: {req.current_land_size or 'Unknown'} acres
+
+Current Step: {req.step}
+Farmer Language: {req.language}
+
+{schema_instructions}
+
+RULES:
+1. Return ONLY valid JSON. No preamble, no conversational filler on the outside.
+2. The 'ai_reply' MUST be in {req.language} script.
+3. Be EXTREMELY BRIEF in 'ai_reply' (max 10 words).
+4. If a field like 'crop' or 'land_size' is already known from CONTEXT, do NOT ask for it again. Focus on the missing info.
+5. Do NOT say "I am a farm assistant" or similar placeholders.
+"""
+        # Safer logging for Windows terminals
+        try:
+            print(f"DEBUG: Onboarding Extract Step: {req.step}")
+        except:
+            pass
+        
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": req.text_input}
+            ],
+            temperature=0.0,
+            response_format={"type": "json_object"}
+        )
+        
+        reply = completion.choices[0].message.content
+        import json
+        parsed = json.loads(reply)
+        return parsed
+        
+    except Exception as e:
+        import traceback
+        print(f"Extraction error: {str(e)}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("/tts")
 def text_to_speech(req: TTSRequest):
     """
@@ -208,11 +292,11 @@ def text_to_speech_stream(text: str = Query(...), language: str = Query("English
         
         target_lang = lang_map.get(language, "en")
         
-        print(f"DEBUG: TTS Request - Lang: {language} ({target_lang}), Text Length: {len(text)}")
-        if len(text) > 100:
-            print(f"DEBUG: Text Snippet: {text[:100]}...")
-        else:
-            print(f"DEBUG: Text Content: {text}")
+        # Use safe logging
+        try:
+            print(f"DEBUG: TTS Request - Lang: {language} ({target_lang})")
+        except:
+            pass
 
         tts = gTTS(text=text, lang=target_lang, slow=False)
         

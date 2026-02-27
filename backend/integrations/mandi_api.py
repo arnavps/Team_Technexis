@@ -64,7 +64,8 @@ async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") ->
         # 3. ATTEMPT OPEN GOVT DATA API (data.gov.in)
         try:
             crop_query = crop.capitalize()
-            open_api_url = f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd0000018f6d2aeef8304ec27142be2cf3ef3688&format=json&limit=5&filters[commodity]={quote(crop_query.upper())}"
+            # Increased limit to 50 for better discovery
+            open_api_url = f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd0000018f6d2aeef8304ec27142be2cf3ef3688&format=json&limit=50&filters[commodity]={quote(crop_query.upper())}"
             async with httpx.AsyncClient(timeout=5.0) as client:
                 res = await client.get(open_api_url)
                 if res.status_code == 200:
@@ -137,7 +138,7 @@ def _parse_gov_api_data(records: List[Dict[str, Any]], crop: str) -> Dict[str, A
         regional_options.append({
             "name": f"{rec.get('market', 'Regional APMC')} ({rec.get('state', 'India')})",
             "current_price": round(price, 2),
-            "distance_km": random.uniform(20.0, 60.0),
+            "distance_km": random.uniform(20.0, 500.0), # Expanded to 500km
             "transport_rate_per_km": 15.0
         })
     return {"primary": primary_mandi, "regional_options": regional_options}
@@ -162,7 +163,7 @@ def _generate_mock_fallback(crop: str, language: str) -> Dict[str, Any]:
             "name": f"Regional Mandi #{i+1}",
             "crop": crop,
             "current_price": price,
-            "distance_km": random.uniform(20.0, 50.0),
+            "distance_km": random.uniform(20.0, 500.0), # Expanded to 500km
             "transport_rate_per_km": 15.0
         })
     return {"primary": primary_mandi, "regional_options": regional_options}

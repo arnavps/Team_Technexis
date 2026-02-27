@@ -29,6 +29,7 @@ export default function DashboardPage() {
     const [isCropSelectorOpen, setIsCropSelectorOpen] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [manualLocation, setManualLocation] = useState<{ lat: number, lng: number } | null>(null);
+    const [profileLocation, setProfileLocation] = useState<{ lat: number, lng: number } | null>(null);
 
     const availableCrops = ["Tomato", "Potato", "Onion", "Soybean", "Wheat", "Cotton"];
     const hubs = [
@@ -47,7 +48,7 @@ export default function DashboardPage() {
                     import('@/services/firebase').then(async ({ auth }) => {
                         const { data } = await supabase
                             .from('profiles')
-                            .select('name, crop, yield_quintals')
+                            .select('name, crop, yield_quintals, latitude, longitude')
                             .eq('phone', phone)
                             .single();
                         if (data?.name) setProfileName(data.name);
@@ -56,6 +57,9 @@ export default function DashboardPage() {
                             setYieldEst(data.yield_quintals);
                         } else {
                             setYieldEst(50); // ultimate fallback
+                        }
+                        if (data?.latitude && data?.longitude) {
+                            setProfileLocation({ lat: data.latitude, lng: data.longitude });
                         }
                         setProfileLoaded(true);
                     });
@@ -159,7 +163,7 @@ export default function DashboardPage() {
 
             const payload = {
                 crop: userCrop || "",
-                location: manualLocation || (location ? { lat: location.latitude, lng: location.longitude } : { lat: 18.5204, lng: 73.8567 }), // Fallback to Pune if GPS denied
+                location: manualLocation || (location ? { lat: location.latitude, lng: location.longitude } : (profileLocation || { lat: 18.5204, lng: 73.8567 })), // Fallback order: Manual -> GPS -> Profile -> Pune
                 yield_est_quintals: yieldEst,
                 base_spoilage_rate: 0.05,
                 language: language
