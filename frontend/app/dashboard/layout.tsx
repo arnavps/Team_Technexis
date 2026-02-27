@@ -22,7 +22,7 @@ export default function DashboardLayout({
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const phone = auth.currentUser?.phoneNumber || "9999999999";
+                const phone = auth.currentUser?.phoneNumber || localStorage.getItem('demo_phone') || "9999999999";
                 const { data } = await supabase
                     .from('profiles')
                     .select('name')

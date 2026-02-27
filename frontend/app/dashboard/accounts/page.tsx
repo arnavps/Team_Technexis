@@ -22,7 +22,7 @@ export default function AccountsPage() {
         const fetchProfile = async () => {
             try {
                 // In production, get phone from auth.currentUser.phoneNumber
-                const phone = auth.currentUser?.phoneNumber || "9999999999";
+                const phone = auth.currentUser?.phoneNumber || localStorage.getItem('demo_phone') || "9999999999";
                 setProfile(prev => ({ ...prev, phone }));
 
                 const { data, error } = await supabase

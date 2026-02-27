@@ -18,12 +18,12 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
     const distanceKm = data.mandi_stats?.distance_km || 0;
     const yieldQtl = data.yield_quintals || 50;
 
-    const grossRevenue = data.breakdown?.gross_revenue || (price * yieldQtl);
-    const logistics = data.breakdown?.logistics_cost || Math.round(distanceKm * 15);
-    const spoilagePenalty = data.breakdown?.spoilage_penalty || Math.round(grossRevenue * (data.mandi_stats?.quality_loss_pct || 0.02));
+    const grossRevenue = data.breakdown?.gross_revenue ?? (price * yieldQtl);
+    const logistics = data.breakdown?.logistics_cost ?? Math.round(distanceKm * 15);
+    const spoilagePenalty = data.breakdown?.spoilage_penalty ?? Math.round(grossRevenue * (data.mandi_stats?.quality_loss_pct ?? 0.02));
 
     // Final source of truth: backend total
-    const totalTakeHome = data.total_net_profit || (grossRevenue - logistics - spoilagePenalty);
+    const totalTakeHome = data.total_net_profit ?? (grossRevenue - logistics - spoilagePenalty);
     const perQuintalRealization = data.net_realization_inr_per_quintal || (totalTakeHome / yieldQtl);
 
     return (

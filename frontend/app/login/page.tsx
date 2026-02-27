@@ -35,6 +35,8 @@ export default function LoginPage() {
         }
     }, []);
 
+    const DEMO_ACCOUNTS = ['9999999999', '9869530800', '7777777777', '8888888888'];
+
     const handleSendOtp = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -47,7 +49,7 @@ export default function LoginPage() {
         }
 
         // --- DEVELOPER BYPASS ---
-        if (phone === '9999999999' || phone === '9869530800') {
+        if (DEMO_ACCOUNTS.includes(phone)) {
             setStep('OTP');
             setLoading(false);
             return;
@@ -79,7 +81,7 @@ export default function LoginPage() {
         setLoading(true);
         setError('');
 
-        if (!confirmationResult && phone !== '9999999999' && phone !== '9869530800') {
+        if (!confirmationResult && !DEMO_ACCOUNTS.includes(phone)) {
             setError(t('sessionExpired'));
             setStep('PHONE');
             setLoading(false);
@@ -88,10 +90,10 @@ export default function LoginPage() {
 
         try {
             // --- DEVELOPER BYPASS ---
-            if (phone === '9999999999' || phone === '9869530800') {
+            if (DEMO_ACCOUNTS.includes(phone)) {
                 if (otp === '123456') {
                     localStorage.setItem('demo_phone', phone);
-                    router.push('/dashboard');
+                    router.push('/onboarding');
                     return;
                 } else {
                     throw new Error("Invalid Demo OTP");

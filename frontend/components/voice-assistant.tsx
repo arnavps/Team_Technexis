@@ -250,7 +250,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     };
 
     const content = (
-        <div className={`${isEmbedded ? 'w-full' : 'w-full max-w-lg bg-forest/90 backdrop-blur-xl border border-glass-border rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom-10 duration-300'}`}>
+        <div className={`${isEmbedded ? 'w-full' : 'w-full max-w-lg max-h-[90vh] overflow-y-auto bg-forest/90 backdrop-blur-xl border border-glass-border rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative animate-in slide-in-from-bottom-10 duration-300'}`}>
             {/* Header */}
             <div className="flex justify-between items-center mb-6 border-b border-glass-border pb-4">
                 <div>
@@ -261,11 +261,18 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                     <p className="text-sm text-gray-400">Ask why you should sell or wait</p>
                 </div>
                 {!isEmbedded && (
-                    <button onClick={() => {
-                        setIsOpen(false);
-                        if (audioRef.current) audioRef.current.pause();
-                    }} className="text-gray-400 hover:text-white p-2">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsOpen(false);
+                            if (audioRef.current) audioRef.current.pause();
+                        }}
+                        className="flex items-center space-x-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 px-3 py-1.5 rounded-full border border-white/10 hover:border-red-500/30 transition-all font-bold text-xs uppercase tracking-widest"
+                    >
+                        <span>Close</span>
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                     </button>
                 )}
             </div>
@@ -391,8 +398,16 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
 
             {/* Glassy Bottom Sheet Overlay */}
             {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-                    {content}
+                <div
+                    className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+                    onClick={() => {
+                        setIsOpen(false);
+                        if (audioRef.current) audioRef.current.pause();
+                    }}
+                >
+                    <div onClick={(e) => e.stopPropagation()} className="w-full sm:w-auto">
+                        {content}
+                    </div>
                 </div>
             )}
         </>

@@ -23,8 +23,9 @@ export default function DashboardPage() {
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
     const [profileName, setProfileName] = useState('');
     const [userCrop, setUserCrop] = useState('');
+    const [yieldEst, setYieldEst] = useState<number | null>(null);
+    const [profileLoaded, setProfileLoaded] = useState(false);
     const [vakeelQuery, setVakeelQuery] = useState('');
-    const [yieldEst, setYieldEst] = useState(50);
     const [isCropSelectorOpen, setIsCropSelectorOpen] = useState(false);
     const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
     const [manualLocation, setManualLocation] = useState<{ lat: number, lng: number } | null>(null);
@@ -46,15 +47,23 @@ export default function DashboardPage() {
                     import('@/services/firebase').then(async ({ auth }) => {
                         const { data } = await supabase
                             .from('profiles')
-                            .select('name, crop')
+                            .select('name, crop, yield_quintals')
                             .eq('phone', phone)
                             .single();
                         if (data?.name) setProfileName(data.name);
                         if (data?.crop) setUserCrop(data.crop);
+                        if (data?.yield_quintals) {
+                            setYieldEst(data.yield_quintals);
+                        } else {
+                            setYieldEst(50); // ultimate fallback
+                        }
+                        setProfileLoaded(true);
                     });
                 });
             } catch (error) {
                 console.error("Failed to fetch profile in topbar");
+                setYieldEst(50);
+                setProfileLoaded(true);
             }
         };
         fetchProfile();
@@ -76,7 +85,7 @@ export default function DashboardPage() {
     const recalculateWithOverrides = (currentData: any, newOverrides: Record<string, number>, newYield?: number) => {
         if (!currentData) return;
         const updated = JSON.parse(JSON.stringify(currentData)); // Deep clone
-        const activeYield = newYield ?? yieldEst;
+        const activeYield = newYield ?? (yieldEst || 50);
 
         // Mocking the backend logic for immediate UI response
         const tempKey = t('temp') || 'Temperature';
@@ -113,9 +122,15 @@ export default function DashboardPage() {
 
         if (updated.breakdown) {
             updated.breakdown.gross_revenue = updated.mandi_stats.current_price * activeYield;
-            updated.breakdown.logistics_cost = (updated.breakdown.logistics_cost / (currentData.yield_quintals || 50)) * activeYield;
-            updated.breakdown.spoilage_penalty = (updated.breakdown.quality_loss_pct / 100) * updated.breakdown.gross_revenue;
+            // Logistics cost is per-trip, so keep it flat rather than scaling wildly by yield for minor adjustments
+            updated.breakdown.logistics_cost = currentData.breakdown?.logistics_cost ?? 0;
+            // Spoilage percentage logic (from 0 to 1 scale vs % scale depending on backend format)
+            const qualityLossPct = updated.mandi_stats?.quality_loss_pct ?? 0;
+            updated.breakdown.spoilage_penalty = (qualityLossPct / 100) * updated.breakdown.gross_revenue;
         }
+
+        updated.total_net_profit = (updated.breakdown?.gross_revenue ?? 0) - (updated.breakdown?.logistics_cost ?? 0) - (updated.breakdown?.spoilage_penalty ?? 0);
+        updated.net_realization_inr_per_quintal = updated.total_net_profit / activeYield;
 
         updated.is_manual_override = true;
         updated.manual_override_count = Object.keys(newOverrides).length;
@@ -197,8 +212,10 @@ export default function DashboardPage() {
     }, [requestLocation, location]);
 
     useEffect(() => {
-        fetchRecommendation();
-    }, [isOnline, userCrop, location]);
+        if (profileLoaded) {
+            fetchRecommendation();
+        }
+    }, [isOnline, userCrop, location, profileLoaded]);
 
     if (loading) {
         return (
@@ -327,10 +344,9 @@ export default function DashboardPage() {
                                 type="range"
                                 min="1"
                                 max="500"
-                                step="1"
-                                value={yieldEst}
+                                value={yieldEst || 50}
                                 onChange={(e) => {
-                                    const val = parseInt(e.target.value);
+                                    const val = parseFloat(e.target.value) || 0;
                                     setYieldEst(val);
                                     recalculateWithOverrides(data, overrides, val);
                                 }}
