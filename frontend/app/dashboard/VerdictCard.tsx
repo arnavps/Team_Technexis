@@ -8,7 +8,7 @@ interface VerdictCardProps {
 }
 
 export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
-    const { t } = useLanguage();
+    const { t, n } = useLanguage();
     const [isExpanded, setIsExpanded] = useState(false);
 
     if (!data) return null;
@@ -62,24 +62,24 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
                         <h3 className="text-8xl lg:text-9xl font-black text-amber-500 mb-2 drop-shadow-[0_0_35px_rgba(245,158,11,0.6)] tracking-tighter italic">
                             {t('wait') || 'WAIT'}
                         </h3>
-                        <p className="text-white/80 font-bold text-sm max-w-xs mx-auto">Supply overflow. Waiting 48h increases profit probability.</p>
+                        <p className="text-white/80 font-bold text-sm max-w-xs mx-auto">{t('waitDesc') || 'Supply overflow. Waiting 48h increases profit probability.'}</p>
                     </div>
                 ) : (
                     <div className="animate-in fade-in zoom-in duration-500">
                         <h3 className="text-8xl lg:text-9xl font-black text-yellow-400 mb-2 drop-shadow-[0_0_35px_rgba(250,204,21,0.6)] tracking-tighter italic">
                             {t('hold') || 'HOLD'}
                         </h3>
-                        <p className="text-white/80 font-bold text-sm max-w-xs mx-auto">Volatility mapped. Standing by for arbitrage signal.</p>
+                        <p className="text-white/80 font-bold text-sm max-w-xs mx-auto">{t('holdDesc') || 'Volatility mapped. Standing by for arbitrage signal.'}</p>
                     </div>
                 )}
 
                 {onExplain && (
                     <button
-                        onClick={() => onExplain("Explain why you recommended this action.")}
+                        onClick={() => onExplain(t('askWhy') || "Explain why you recommended this action.")}
                         className="mt-8 px-6 py-2.5 bg-white/10 hover:bg-mint text-white hover:text-forest border border-white/20 hover:border-mint rounded-full text-xs font-black transition-all flex items-center space-x-2 mx-auto uppercase tracking-widest shadow-xl group"
                     >
                         <svg className="w-4 h-4 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                        <span>Ask Vakeel Why</span>
+                        <span>{t('askVakeelWhy') || 'Ask Vakeel Why'}</span>
                     </button>
                 )}
             </div>
@@ -97,7 +97,7 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full flex items-center justify-center space-x-2 text-[10px] text-gray-500 font-black uppercase tracking-widest py-2 hover:text-white transition-colors"
                 >
-                    <span>{isExpanded ? 'Hide' : 'Show'} Audit Trail</span>
+                    <span>{isExpanded ? (t('hideAuditTrail') || 'Hide Audit Trail') : (t('showAuditTrail') || 'Show Audit Trail')}</span>
                     <svg className={`w-3 h-3 transform transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -109,27 +109,27 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
                         <div className="flex justify-between items-center text-gray-300">
                             <span className="flex items-center text-xs">
                                 <span className="w-1.5 h-1.5 bg-mint rounded-full mr-2"></span>
-                                MARKET VALUE
+                                {t('marketValue') || 'MARKET VALUE'}
                             </span>
-                            <span className="text-white">+₹{(grossRevenue).toLocaleString('en-IN')}</span>
+                            <span className="text-white">+₹{n(grossRevenue)}</span>
                         </div>
 
                         {/* Logistics */}
                         <div className="flex justify-between items-center text-gray-400">
                             <span className="flex items-center text-xs">
                                 <span className="w-1.5 h-1.5 rounded-full bg-red-400 mr-2"></span>
-                                LOGISTICS
+                                {t('logistics') || 'LOGISTICS'}
                             </span>
-                            <span className="text-red-400">-₹{(logistics).toLocaleString('en-IN')}</span>
+                            <span className="text-red-400">-₹{n(logistics)}</span>
                         </div>
 
                         {/* Spoilage */}
                         <div className="flex justify-between items-center text-gray-400">
                             <span className="flex items-center text-xs">
                                 <span className="w-1.5 h-1.5 bg-red-500 rounded-full mr-2"></span>
-                                QUALITY LOSS
+                                {t('qualityLoss') || 'QUALITY LOSS'}
                             </span>
-                            <span className="text-red-400">-₹{(spoilagePenalty).toLocaleString('en-IN')}</span>
+                            <span className="text-red-400">-₹{n(spoilagePenalty)}</span>
                         </div>
                     </div>
                 )}
@@ -142,7 +142,7 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mint opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-mint"></span>
                     </span>
-                    <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest">Live Arbitration Logic Active</span>
+                    <span className="text-[8px] text-gray-500 uppercase font-black tracking-widest">{t('liveArbitration') || 'Live Arbitration Logic Active'}</span>
                 </div>
             </div>
         </div>
@@ -150,6 +150,7 @@ export function VerdictCard({ data, userCrop, onExplain }: VerdictCardProps) {
 }
 
 function AnimatedNumber({ value }: { value: number }) {
+    const { n } = useLanguage();
     const [displayValue, setDisplayValue] = useState(value);
 
     useEffect(() => {
@@ -169,5 +170,5 @@ function AnimatedNumber({ value }: { value: number }) {
         window.requestAnimationFrame(step);
     }, [value]);
 
-    return <>{displayValue.toLocaleString('en-IN')}</>;
+    return <>{n(displayValue)}</>;
 }

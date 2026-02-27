@@ -7,7 +7,7 @@ import { auth } from '@/services/firebase';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function AccountsPage() {
-    const { t } = useLanguage();
+    const { t, n } = useLanguage();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [profile, setProfile] = useState({
@@ -119,8 +119,8 @@ export default function AccountsPage() {
                             <span className="text-2xl text-mint font-bold">{profile.name ? profile.name.charAt(0).toUpperCase() : 'U'}</span>
                         </div>
                         <div>
-                            <h2 className="text-xl font-bold text-white">{profile.name || 'User'}</h2>
-                            <span className="text-sm font-mono text-gray-400">{profile.phone}</span>
+                            <h2 className="text-xl font-bold text-white">{profile.name || t('user') || 'User'}</h2>
+                            <span className="text-sm font-mono text-gray-400">{n(profile.phone)}</span>
                             <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-green-500/10 text-green-400 border border-green-500/20">
                                 {t('verified')}
                             </span>
@@ -157,9 +157,9 @@ export default function AccountsPage() {
                                 onChange={(e) => setProfile(prev => ({ ...prev, crop: e.target.value }))}
                             >
                                 <option value="" className="text-gray-900">{t('select')}</option>
-                                <option value="tomato" className="text-gray-900">Tomato</option>
-                                <option value="onion" className="text-gray-900">Onion</option>
-                                <option value="potato" className="text-gray-900">Potato</option>
+                                <option value="tomato" className="text-gray-900">{t('tomato') || 'Tomato'}</option>
+                                <option value="onion" className="text-gray-900">{t('onion') || 'Onion'}</option>
+                                <option value="potato" className="text-gray-900">{t('potato') || 'Potato'}</option>
                             </select>
                         </div>
 

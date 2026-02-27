@@ -16,11 +16,12 @@ interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
     t: (key: keyof Translations) => string;
+    n: (value: number | string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const dictionaries = {
+const dictionaries: Record<string, any> = {
     en,
     hi,
     mr,
@@ -50,8 +51,43 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         return dictionaries[language][key] || dictionaries.en[key] || key;
     };
 
+    const n = (value: number | string): string => {
+        const num = typeof value === 'string' ? parseFloat(value) : value;
+        if (isNaN(num)) return String(value);
+
+        const locales: Record<Language, string> = {
+            en: 'en-IN',
+            hi: 'hi-IN',
+            mr: 'mr-IN',
+            te: 'te-IN',
+            ta: 'ta-IN',
+            gu: 'gu-IN',
+            pa: 'pa-IN'
+        };
+
+        const numberingSystems: Record<Language, string> = {
+            en: 'latn',
+            hi: 'deva',
+            mr: 'deva',
+            te: 'telu',
+            ta: 'tamldec',
+            gu: 'gujr',
+            pa: 'guru'
+        };
+
+        try {
+            return new Intl.NumberFormat(locales[language], {
+                useGrouping: false, // Prevents commas, making it a pure digit replacement if needed
+                maximumFractionDigits: 2,
+                numberingSystem: numberingSystems[language]
+            }).format(num);
+        } catch (e) {
+            return String(value); // Fallback
+        }
+    };
+
     return (
-        <LanguageContext.Provider value={{ language, setLanguage, t }}>
+        <LanguageContext.Provider value={{ language, setLanguage, t, n }}>
             {children}
         </LanguageContext.Provider>
     );

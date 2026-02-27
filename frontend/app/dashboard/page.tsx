@@ -17,7 +17,7 @@ import { VakeelBrief } from '@/components/dashboard/VakeelBrief';
 import { auth } from '@/services/firebase';
 
 export default function DashboardPage() {
-    const { t, language } = useLanguage();
+    const { t, n, language } = useLanguage();
     const [data, setData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [lastFetched, setLastFetched] = useState<Date | null>(null);
@@ -241,13 +241,13 @@ export default function DashboardPage() {
             <header className="relative z-50 flex items-center justify-between mb-8">
                 <div>
                     <div className="flex items-center space-x-3 mb-2">
-                        <h1 className="text-2xl font-bold tracking-tight text-white uppercase tracking-tighter">Decision Hub</h1>
+                        <h1 className="text-2xl font-bold tracking-tight text-white uppercase tracking-tighter">{t('decisionHub') || "Decision Hub"}</h1>
                         <button
                             onClick={() => setIsCropSelectorOpen(true)}
                             className="group flex items-center space-x-2 bg-mint/10 hover:bg-mint/20 border border-mint/30 px-2 py-0.5 rounded-full transition-all"
                         >
                             <span className="text-mint text-[10px] font-black uppercase tracking-widest">
-                                {userCrop || "Select Crop"}
+                                {userCrop || t('selectCrop') || "Select Crop"}
                             </span>
                             <svg className="w-3 h-3 text-mint opacity-50 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                         </button>
@@ -267,14 +267,14 @@ export default function DashboardPage() {
                             >
                                 <svg className="w-3 h-3 text-mint group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                                 <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">
-                                    {manualLocation ? "Custom Fix" : location ? "Live GPS" : "Pune Hub"}
+                                    {manualLocation ? (t('customFix') || "Custom Fix") : location ? (t('liveGps') || "Live GPS") : (t('puneHub') || "Pune Hub")}
                                 </span>
                             </button>
 
                             <div className="flex items-center space-x-1.5 border-l border-white/10 pl-4">
                                 <span className="w-1.5 h-1.5 bg-mint rounded-full animate-pulse"></span>
                                 <span className="text-[10px] text-gray-500 uppercase tracking-widest font-medium">
-                                    Last Sync: {lastFetched ? lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just Now"}
+                                    {t('lastSync') || 'Last Sync'}: {lastFetched ? lastFetched.toLocaleTimeString(language === 'en' ? 'en-IN' : `${language}-IN`, { hour: '2-digit', minute: '2-digit' }) : (t('justNow') || "Just Now")}
                                 </span>
                             </div>
                         </div>
@@ -337,8 +337,8 @@ export default function DashboardPage() {
                     <div className="order-2 lg:order-2">
                         <GlassCard className="p-6">
                             <div className="flex justify-between items-center mb-4">
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Yield Calibration</h3>
-                                <span className="text-mint font-mono font-bold text-xl">{yieldEst} Qtl</span>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">{t('yieldCalibration') || 'Yield Calibration'}</h3>
+                                <span className="text-mint font-mono font-bold text-xl">{n(yieldEst || 50)} {t('qtl') || 'Qtl'}</span>
                             </div>
                             <input
                                 type="range"
@@ -355,9 +355,9 @@ export default function DashboardPage() {
                                 className="w-full h-1.5 bg-mint/20 rounded-lg appearance-none cursor-pointer accent-mint mb-2"
                             />
                             <div className="flex justify-between text-[10px] text-gray-500 font-bold">
-                                <span>1 QTL</span>
-                                <span>TOTAL FIELD ESTIMATE</span>
-                                <span>500 QTL</span>
+                                <span>{n(1)} {t('qtl') || 'QTL'}</span>
+                                <span>{t('totalFieldEst') || 'TOTAL FIELD ESTIMATE'}</span>
+                                <span>{n(500)} {t('qtl') || 'QTL'}</span>
                             </div>
                         </GlassCard>
                     </div>
@@ -385,7 +385,7 @@ export default function DashboardPage() {
                     <GlassCard className="max-w-md w-full p-8 shadow-2xl border-mint/20">
                         <h3 className="text-xl font-bold text-white mb-6 flex items-center">
                             <svg className="w-6 h-6 text-mint mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-                            Correction: Select Active Crop
+                            {t('correctionSelectCrop') || 'Correction: Select Active Crop'}
                         </h3>
                         <div className="grid grid-cols-2 gap-3 mb-8">
                             {availableCrops.map(crop => (
@@ -399,7 +399,7 @@ export default function DashboardPage() {
                                         ? 'bg-mint text-forest border-mint shadow-[0_0_15px_rgba(32,255,189,0.3)]'
                                         : 'bg-white/5 text-white border-white/10 hover:border-mint/50'}`}
                                 >
-                                    {crop}
+                                    {t(crop.toLowerCase() as any) || crop}
                                 </button>
                             ))}
                         </div>
@@ -407,7 +407,7 @@ export default function DashboardPage() {
                             onClick={() => setIsCropSelectorOpen(false)}
                             className="w-full py-3 text-sm text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
                         >
-                            Cancel
+                            {t('cancel') || 'Cancel'}
                         </button>
                     </GlassCard>
                 </div>
@@ -418,9 +418,9 @@ export default function DashboardPage() {
                     <GlassCard className="max-w-md w-full p-8 shadow-2xl border-white/10">
                         <h3 className="text-xl font-bold text-white mb-4 flex items-center">
                             <svg className="w-6 h-6 text-mint mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                            Correction: Field Location
+                            {t('correctionFieldLocation') || 'Correction: Field Location'}
                         </h3>
-                        <p className="text-xs text-gray-400 mb-6 leading-relaxed">If your GPS signal is weak in the field, select a nearby agricultural hub or use your saved coordinates for accurate transit math.</p>
+                        <p className="text-xs text-gray-400 mb-6 leading-relaxed">{t('gpsWeakDesc') || 'If your GPS signal is weak in the field, select a nearby agricultural hub or use your saved coordinates for accurate transit math.'}</p>
 
                         <div className="space-y-3 mb-8">
                             <button
@@ -432,8 +432,8 @@ export default function DashboardPage() {
                                 className="w-full flex items-center justify-between p-4 rounded-xl border border-mint/30 bg-mint/5 hover:bg-mint/10 transition-all group"
                             >
                                 <div className="text-left">
-                                    <p className="text-sm font-bold text-mint uppercase tracking-widest">Use Live GPS</p>
-                                    <p className="text-[10px] text-mint/60">Auto-detect from device</p>
+                                    <p className="text-sm font-bold text-mint uppercase tracking-widest">{t('useLiveGps') || 'Use Live GPS'}</p>
+                                    <p className="text-[10px] text-mint/60">{t('autoDetectDevice') || 'Auto-detect from device'}</p>
                                 </div>
                                 <svg className="w-5 h-5 text-mint animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
                             </button>
@@ -459,7 +459,7 @@ export default function DashboardPage() {
                             onClick={() => setIsLocationModalOpen(false)}
                             className="w-full py-3 text-sm text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
                         >
-                            Back to Hub
+                            {t('backToHub') || 'Back to Hub'}
                         </button>
                     </GlassCard>
                 </div>

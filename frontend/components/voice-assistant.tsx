@@ -11,7 +11,7 @@ interface VoiceAssistantProps {
 }
 
 export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery = "" }: VoiceAssistantProps) {
-    const { language: globalLanguage } = useLanguage();
+    const { t, language: globalLanguage } = useLanguage();
 
     // Map context codes to backend names
     const langCodeToName: Record<string, string> = {
@@ -28,6 +28,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     const [isListening, setIsListening] = useState(false);
     const [isThinking, setIsThinking] = useState(false);
     const [transcript, setTranscript] = useState("");
+    const [textInput, setTextInput] = useState("");
     const [response, setResponse] = useState("");
     const [language, setLanguage] = useState(langCodeToName[globalLanguage] || "Hindi");
     const [isSupported, setIsSupported] = useState(true);
@@ -98,9 +99,9 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 setIsListening(false);
 
                 if (event.error === 'not-allowed') {
-                    setErrorMsg("Microphone access denied.");
+                    setErrorMsg(t('micDenied') || "Microphone access denied.");
                 } else if (event.error === 'network') {
-                    setErrorMsg("Network error.");
+                    setErrorMsg(t('networkError') || "Network error.");
                 } else {
                     setErrorMsg(`Error: ${event.error}`);
                 }
@@ -151,7 +152,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 setIsListening(true);
             } catch (err) {
                 console.error("Microphone permission denied or not supported:", err);
-                setErrorMsg("Microphone access is required to use the Voice Assistant.");
+                setErrorMsg(t('micRequired') || "Microphone access is required to use the Voice Assistant.");
                 setIsListening(false);
             }
         }
@@ -210,13 +211,9 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
     const handleAskVakeel = async (query: string) => {
         if (!query.trim() || !dashboardData) return;
 
-        // If offline, provide the cached response or a default offline message
-        if (!isOnline) {
-            const offlineMsg = cachedAiResponse || "Internet connection lost. Please refer to the saved dashboard colors.";
-            setResponse(offlineMsg);
-            speakResponse(offlineMsg);
-            return;
-        }
+        // Also update the transcript UI so the user sees what they typed
+        setTranscript(query);
+        setTextInput(""); // clear the input field
 
         setIsThinking(true);
         try {
@@ -237,11 +234,11 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 saveToCache(data.response); // Cache the latest working response for offline resilience
                 speakResponse(data.response);
             } else {
-                setResponse(language === "English" ? "Sorry, I couldn't connect to the server." : "Maaf kijiye, server se connect nahi ho paya.");
+                setResponse(t('serverError') || "Sorry, I couldn't connect to the server.");
             }
         } catch (error) {
             console.error(error);
-            const fallback = cachedAiResponse || "Network error occurred.";
+            const fallback = cachedAiResponse || t('networkErrorOccurred') || "Network error occurred.";
             setResponse(fallback);
             speakResponse(fallback);
         } finally {
@@ -256,9 +253,9 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 <div>
                     <h3 className="text-xl font-bold text-white flex items-center">
                         <span className="w-3 h-3 rounded-full bg-mint animate-pulse mr-2"></span>
-                        Agri-Vakeel AI
+                        {t('agriVakeel') || 'Agri-Vakeel AI'}
                     </h3>
-                    <p className="text-sm text-gray-400">Ask why you should sell or wait</p>
+                    <p className="text-sm text-gray-400">{t('askWhySellWait') || 'Ask why you should sell or wait'}</p>
                 </div>
                 {!isEmbedded && (
                     <button
@@ -269,7 +266,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                         }}
                         className="flex items-center space-x-2 bg-white/5 hover:bg-red-500/20 text-gray-300 hover:text-red-400 px-3 py-1.5 rounded-full border border-white/10 hover:border-red-500/30 transition-all font-bold text-xs uppercase tracking-widest"
                     >
-                        <span>Close</span>
+                        <span>{t('close') || 'Close'}</span>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                         </svg>
@@ -308,7 +305,7 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                             <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                             <div className="w-2 h-2 rounded-full bg-mint animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                        <span className="text-[10px] text-mint/60 uppercase tracking-widest font-bold">MittiMitra is finding an answer...</span>
+                        <span className="text-[10px] text-mint/60 uppercase tracking-widest font-bold">{t('findingAnswer') || 'MittiMitra is finding an answer...'}</span>
                     </div>
                 )}
 
@@ -354,28 +351,53 @@ export function VoiceAssistant({ dashboardData, isEmbedded = false, initialQuery
                 </button>
                 <p className={`text-sm mt-4 font-medium transition-colors ${errorMsg ? 'text-red-400' : 'text-gray-400'}`}>
                     {!isSupported
-                        ? "Voice not supported in this browser"
+                        ? (t('voiceNotSupported') || "Voice not supported in this browser")
                         : errorMsg
                             ? errorMsg
                             : isListening
-                                ? "Listening... Tap to stop"
-                                : "Tap to speak with Agri-Vakeel"}
+                                ? (t('listeningTapStop') || "Listening... Tap to stop")
+                                : (t('tapToSpeak') || "Tap to speak with Agri-Vakeel")}
                 </p>
                 {errorMsg && (
                     <button
                         onClick={() => { setErrorMsg(null); initRecognition(); }}
                         className="text-xs text-mint underline mt-2 hover:text-white"
                     >
-                        Try Again
+                        {t('tryAgain') || 'Try Again'}
                     </button>
                 )}
+
+                {/* --- Text Fallback UI --- */}
+                <div className="w-full mt-6 pt-6 border-t border-glass-border flex space-x-2">
+                    <input
+                        type="text"
+                        value={textInput}
+                        onChange={(e) => setTextInput(e.target.value)}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleAskVakeel(textInput);
+                        }}
+                        placeholder={`${t('typeQuestionIn') || 'Type your question in'} ${language}...`}
+                        className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-mint focus:ring-1 focus:ring-mint transition-all"
+                    />
+                    <button
+                        onClick={() => handleAskVakeel(textInput)}
+                        disabled={!textInput.trim() || isThinking}
+                        className="bg-mint text-forest p-3 rounded-xl disabled:opacity-50 hover:bg-white hover:shadow-[0_0_15px_rgba(32,255,189,0.3)] transition-all flex items-center justify-center min-w-[3rem]"
+                    >
+                        {isThinking ? (
+                            <div className="w-4 h-4 border-2 border-forest border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
+                        )}
+                    </button>
+                </div>
             </div>
 
             {/* Voice Engine Diagnostic (Subtle) */}
             {lastVoiceName && (
                 <div className="mt-4 flex justify-center">
                     <p className="text-[10px] text-white/20 font-mono tracking-tight uppercase">
-                        AI Engine: {lastVoiceName}
+                        {t('aiEngine') || 'AI Engine'}: {lastVoiceName}
                     </p>
                 </div>
             )}

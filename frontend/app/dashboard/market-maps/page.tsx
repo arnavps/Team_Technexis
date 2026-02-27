@@ -6,7 +6,7 @@ import { useOfflineCache } from '@/hooks/useOfflineCache';
 import { StatusPill } from '@/components/status-pill';
 
 export default function MarketMapsPage() {
-    const { t } = useLanguage();
+    const { t, n } = useLanguage();
 
     const { cachedData } = useOfflineCache('dashboard_recommendation');
 
@@ -91,14 +91,14 @@ export default function MarketMapsPage() {
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                                     </svg>
-                                                    {roundVal(option.distance_km)}km {t('distance')}
+                                                    {n(roundVal(option.distance_km))} {t('km') || 'km'} {t('distance')}
                                                 </span>
                                                 <span className="text-gray-600 text-xs">•</span>
                                                 <span className="text-xs text-gray-400 flex items-center">
                                                     <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     </svg>
-                                                    {(option.distance_km * 1.5).toFixed(0)} mins
+                                                    {n((option.distance_km * 1.5).toFixed(0))} {t('mins') || 'mins'}
                                                 </span>
                                             </div>
                                         </div>
@@ -120,7 +120,7 @@ export default function MarketMapsPage() {
                                             <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                             </svg>
-                                            {t('warningSpoilage')} (<span className="text-red-400 ml-1 font-mono">₹{option.quality_loss_inr.toLocaleString()}</span>)
+                                            {t('warningSpoilage')} (<span className="text-red-400 ml-1 font-mono">₹{n(option.quality_loss_inr)}</span>)
                                         </div>
                                     )}
 
@@ -128,12 +128,12 @@ export default function MarketMapsPage() {
                                     <div className="grid grid-cols-2 gap-3 mt-4 pt-3 border-t border-white/5">
                                         <div>
                                             <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('price')}</p>
-                                            <p className="font-mono text-sm text-gray-300">₹{option.market_price}</p>
+                                            <p className="font-mono text-sm text-gray-300">₹{n(option.market_price)}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-[10px] text-gray-500 uppercase tracking-widest">{t('logiSpoilage')}</p>
                                             <p className="font-mono text-sm text-red-400">
-                                                -₹{(option.transport_cost_inr + option.quality_loss_inr).toLocaleString()}
+                                                -₹{n(option.transport_cost_inr + option.quality_loss_inr)}
                                             </p>
                                         </div>
                                     </div>
@@ -142,7 +142,7 @@ export default function MarketMapsPage() {
                                     <div className="mt-3 pt-3 border-t border-white/10 flex justify-between items-end">
                                         <p className="text-xs font-medium text-gray-400">{t('takeHomeProfit')}</p>
                                         <p className="font-mono text-lg font-bold text-white">
-                                            ₹{option.total_net_profit.toLocaleString()}
+                                            ₹{n(option.total_net_profit)}
                                         </p>
                                     </div>
                                 </div>
@@ -155,16 +155,16 @@ export default function MarketMapsPage() {
                     <h2 className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-4">{t('routeOptimizationLogic')}</h2>
                     <div className="space-y-4 font-mono text-sm">
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-500">Transport Rate</span>
-                            <span className="text-white">₹15.0 / km</span>
+                            <span className="text-gray-500">{t('transportRate') || 'Transport Rate'}</span>
+                            <span className="text-white">₹{n(15.0)} / {t('km') || 'km'}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-500">Base Transit Speed</span>
-                            <span className="text-white">30 km/hr</span>
+                            <span className="text-gray-500">{t('baseTransitSpeed') || 'Base Transit Speed'}</span>
+                            <span className="text-white">{n(30)} {t('kmPerHour') || 'km/hr'}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-500">Q10 Spoilage Active</span>
-                            <span className="text-mint ml-2">ENABLED</span>
+                            <span className="text-gray-500">{t('q10SpoilageActive') || 'Q10 Spoilage Active'}</span>
+                            <span className="text-mint ml-2">{t('enabled') || 'ENABLED'}</span>
                         </div>
                     </div>
                 </GlassCard>

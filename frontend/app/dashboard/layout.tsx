@@ -44,6 +44,7 @@ export default function DashboardLayout({
     const navItems = [
         {
             name: 'Strategy',
+            tKey: 'strategy',
             href: '/dashboard',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,6 +54,7 @@ export default function DashboardLayout({
         },
         {
             name: 'Market Maps',
+            tKey: 'marketMaps',
             href: '/dashboard/market-maps',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,6 +64,7 @@ export default function DashboardLayout({
         },
         {
             name: 'Agri-Vakeel',
+            tKey: 'agriVakeelNav',
             href: '/dashboard/agri-vakeel',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,6 +74,7 @@ export default function DashboardLayout({
         },
         {
             name: 'Accounts',
+            tKey: 'accounts',
             href: '/dashboard/accounts',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,9 +90,11 @@ export default function DashboardLayout({
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex flex-col w-64 border-r border-white/20 bg-black/20 backdrop-blur-xl">
                 <div className="p-6 flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center border border-white/10 shadow-inner">
-                        <span className="text-mint font-bold text-lg">M</span>
-                    </div>
+                    <img
+                        src="/logo_notext.jpeg"
+                        alt="MittiMitra Logo"
+                        className="w-8 h-8 object-contain rounded-md"
+                    />
                     <span className="text-xl font-bold tracking-tight text-white"><span className="text-mint">Mitti</span>Mitra</span>
                 </div>
 
@@ -105,7 +111,7 @@ export default function DashboardLayout({
                                     }`}
                             >
                                 {item.icon}
-                                <span className="font-medium">{item.name}</span>
+                                <span className="font-medium">{t(item.tKey as any) || item.name}</span>
                             </Link>
                         );
                     })}
@@ -145,7 +151,7 @@ export default function DashboardLayout({
                                     }`}
                             >
                                 {item.icon}
-                                <span className="text-[10px] font-medium">{t(item.name.toLowerCase().replace(/ \w/g, c => c[1].toUpperCase()).replace('-', '') as any) || item.name}</span>
+                                <span className="text-[10px] font-medium">{t(item.tKey as any) || item.name}</span>
                             </Link>
                         )
                     })}
