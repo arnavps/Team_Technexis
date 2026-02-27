@@ -21,7 +21,7 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const dictionaries: Record<string, any> = {
+const dictionaries = {
     en,
     hi,
     mr,
