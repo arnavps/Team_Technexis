@@ -20,7 +20,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-from api.chat import router as chat_router
+from api.chat import router as chat_router, generate_vakeel_brief
 from api.user import router as user_router
 
 app.include_router(chat_router, prefix="/chat", tags=["AI Explanation"])
@@ -107,12 +107,26 @@ async def get_harvest_recommendation(data: HarvestRequest):
         profit_48h = get_net_realization(
             market_price=price_forecast_48h,
             crop_type=data.crop,
-            distance_km=dist,
+            distance_km=primary_mandi["distance_km"], # Forecast is usually for the nearest/default market
             temp_c=temp_forecast_48h,
             humidity=humidity_today,
             hours_to_market=50.0,
             yield_est=data.yield_est_quintals
         )
+        
+        # 3.5 UNIFIED DECISION LOGIC: Pick the absolute BEST market today
+        # spatial_profits[0] is already sorted by total_net_profit descending
+        best_optimal_option = spatial_profits[0]
+        
+        # Promoting the BEST regional option to be our Primary recommendation baseline
+        profit_today = best_optimal_option["net_profit_per_quintal"]
+        total_profit_today = best_optimal_option["total_net_profit"]
+        best_mandi_name = best_optimal_option["mandi_name"]
+        dist_best = best_optimal_option["distance_km"]
+        
+        gross_rev = best_optimal_option["market_price"] * data.yield_est_quintals
+        logistics_cost = dist_best * 15.0 
+        spoilage_penalty = (best_optimal_option["quality_loss_pct"] / 100.0) * gross_rev
         
         # 4. Synthesize Final Recommendation & Routing Pivot
         is_selling_optimal = profit_today >= profit_48h
@@ -137,12 +151,23 @@ async def get_harvest_recommendation(data: HarvestRequest):
         recommendation = {
             "status": status,
             "net_realization_inr_per_quintal": round(profit_today, 2),
-            "total_net_profit": round(profit_today * data.yield_est_quintals, 2),
+            "total_net_profit": round(total_profit_today, 2),
             "yield_quintals": data.yield_est_quintals,
+            "breakdown": {
+                "gross_revenue": round(gross_rev, 2),
+                "logistics_cost": round(logistics_cost, 2),
+                "spoilage_penalty": round(spoilage_penalty, 2),
+                "quality_loss_pct": round(best_optimal_option["quality_loss_pct"], 2)
+            },
             "profit_forecast_48h": round(profit_48h, 2),
-            "best_mandi": f"{primary_mandi['name']} ({round(dist, 1)} km)",
+            "best_mandi": f"{best_mandi_name} ({round(dist_best, 1)} km)",
             "weather": weather_data,
-            "mandi_stats": primary_mandi, # Send primary stats for the UI cards
+            "mandi_stats": {
+                "name": best_mandi_name,
+                "current_price": best_optimal_option["market_price"],
+                "distance_km": dist_best,
+                "quality_loss_pct": best_optimal_option["quality_loss_pct"]
+            },
             "shock_alert": active_shock,
             "regional_options": spatial_profits, # Send all map data for the Market Maps tab
             "decay_metrics": {
@@ -151,6 +176,9 @@ async def get_harvest_recommendation(data: HarvestRequest):
                 "profit_difference": round(profit_today - profit_48h, 2)
             }
         }
+        
+        # Add AI brief after recommendation is formed
+        recommendation["vakeel_brief"] = generate_vakeel_brief(recommendation, data.language)
         
         return recommendation
 

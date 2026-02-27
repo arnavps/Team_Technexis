@@ -96,6 +96,35 @@ The response should be concise enough for voice playback (around 4-5 sentences) 
 """
     return prompt
 
+def generate_vakeel_brief(context: Dict[str, Any], language: str = "Regional") -> str:
+    """
+    Generates a single-sentence sub-second summary for the dashboard ticker.
+    """
+    if not client:
+        return "Insight: Monitor market volatility and weather closely for optimal profit."
+        
+    status = context.get("status", "HOLD")
+    total_profit = context.get("total_net_profit", 0)
+    best_mandi = context.get("best_mandi", "Unknown")
+    
+    prompt = f"""You are MittiMitra AI. 
+    Task: Summarize why the farmer should {status} based on {best_mandi} and a profit of ₹{total_profit}.
+    Constraint: ONE SENTENCE ONLY. Use the language: {language}.
+    If {language} is not English, use the native script and address politely.
+    Focus on the main driver (e.g., price dip, high spoilage, or shock alert).
+    """
+    
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.1-8b-instant", # Use the fastest model for the ticker
+            max_tokens=60,
+        )
+        return chat_completion.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Brief generation error: {e}")
+        return f"Advice: Market alignment suggests {status} strategy for maximum yield protection."
+
 
 @router.post("/explain")
 def chat_explain(req: ChatRequest):

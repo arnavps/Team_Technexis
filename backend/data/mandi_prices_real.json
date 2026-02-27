@@ -10,19 +10,27 @@
             "markets": [
                 {
                     "name": "Akola",
-                    "price": 8010.0
+                    "price": 8010.0,
+                    "lat": 20.7002,
+                    "lng": 77.0082
                 },
                 {
                     "name": "Amravati",
-                    "price": 7525.0
+                    "price": 7525.0,
+                    "lat": 20.9320,
+                    "lng": 77.7523
                 },
                 {
                     "name": "Jalna",
-                    "price": 7874.0
+                    "price": 7874.0,
+                    "lat": 19.8297,
+                    "lng": 75.8800
                 },
                 {
                     "name": "Umred",
-                    "price": 7530.0
+                    "price": 7530.0,
+                    "lat": 20.8524,
+                    "lng": 79.3262
                 }
             ]
         },
@@ -34,15 +42,27 @@
             "markets": [
                 {
                     "name": "Nashik",
-                    "price": 1850.0
+                    "price": 1850.0,
+                    "lat": 19.9975,
+                    "lng": 73.7898
                 },
                 {
                     "name": "Pune",
-                    "price": 1700.0
+                    "price": 1700.0,
+                    "lat": 18.5204,
+                    "lng": 73.8567
                 },
                 {
                     "name": "Kolar",
-                    "price": 1600.0
+                    "price": 1600.0,
+                    "lat": 13.1362,
+                    "lng": 78.1291
+                },
+                {
+                    "name": "Azadpur (Delhi)",
+                    "price": 1950.0,
+                    "lat": 28.7159,
+                    "lng": 77.1750
                 }
             ]
         },
@@ -54,15 +74,27 @@
             "markets": [
                 {
                     "name": "Lasalgaon",
-                    "price": 1350.0
+                    "price": 1350.0,
+                    "lat": 20.1472,
+                    "lng": 74.2274
                 },
                 {
                     "name": "Shimoga",
-                    "price": 2050.0
+                    "price": 2050.0,
+                    "lat": 13.9299,
+                    "lng": 75.5681
                 },
                 {
                     "name": "Ankleshwar",
-                    "price": 1200.0
+                    "price": 1200.0,
+                    "lat": 21.6264,
+                    "lng": 73.0152
+                },
+                {
+                    "name": "Azadpur (Delhi)",
+                    "price": 2400.0,
+                    "lat": 28.7159,
+                    "lng": 77.1750
                 }
             ]
         },
@@ -74,15 +106,33 @@
             "markets": [
                 {
                     "name": "Himatnagar",
-                    "price": 2800.0
+                    "price": 2800.0,
+                    "lat": 23.5959,
+                    "lng": 72.9641
                 },
                 {
                     "name": "Shimoga",
-                    "price": 3675.0
+                    "price": 3675.0,
+                    "lat": 13.9299,
+                    "lng": 75.5681
                 },
                 {
                     "name": "Indore",
-                    "price": 2950.0
+                    "price": 2950.0,
+                    "lat": 22.7196,
+                    "lng": 75.8577
+                },
+                {
+                    "name": "Karnal",
+                    "price": 2750.0,
+                    "lat": 29.6857,
+                    "lng": 76.9907
+                },
+                {
+                    "name": "Khanna",
+                    "price": 2820.0,
+                    "lat": 30.7071,
+                    "lng": 76.2166
                 }
             ]
         },
@@ -94,11 +144,15 @@
             "markets": [
                 {
                     "name": "Shimoga",
-                    "price": 2400.0
+                    "price": 2400.0,
+                    "lat": 13.9299,
+                    "lng": 75.5681
                 },
                 {
                     "name": "Guntur",
-                    "price": 4500.0
+                    "price": 4500.0,
+                    "lat": 16.3067,
+                    "lng": 80.4365
                 }
             ]
         }

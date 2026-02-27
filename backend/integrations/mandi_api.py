@@ -7,7 +7,17 @@ import httpx
 from urllib.parse import quote
 from integrations.enam_client import enam_client
 
+import math
 logger = logging.getLogger(__name__)
+
+def calculate_haversine(lat1, lon1, lat2, lon2):
+    """Calculate distance in km between two GPS points."""
+    R = 6371.0 # Radius of the Earth in km
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
 
 async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") -> Dict[str, Any]:
     """
@@ -47,7 +57,7 @@ async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") ->
                     
                 commodity_key = crop.lower()
                 if commodity_key in real_data.get("commodities", {}):
-                    return _parse_real_json_data(real_data["commodities"][commodity_key], crop)
+                    return _parse_real_json_data(real_data["commodities"][commodity_key], crop, location)
         except Exception as e:
             logger.error(f"Failed to inject real JSON data: {e}")
 
@@ -67,32 +77,38 @@ async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") ->
     # 4. FINAL FALLBACK: Heuristic Engine
     return _generate_mock_fallback(crop, language)
 
-def _parse_real_json_data(commodity_data: Dict[str, Any], crop: str) -> Dict[str, Any]:
-    # NO DIVIDING BY 100. Keep raw INR (e.g. 7500 for Cotton)
+def _parse_real_json_data(commodity_data: Dict[str, Any], crop: str, user_loc: dict) -> Dict[str, Any]:
+    # user_loc is {"lat": ..., "lng": ...}
     base_price = float(commodity_data["modal_price"])
-    primary_mandi = {
-        "name": f"{commodity_data['markets'][0]['name']} Mandi",
-        "crop": crop,
-        "current_price": round(base_price, 2),
-        "7_day_history": [round(base_price + random.uniform(-50, 50), 2) for _ in range(7)],
-        "current_volume_quintals": random.randint(100, 500),
-        "average_volume_quintals": 250,
-        "distance_km": random.uniform(5.0, 15.0),
-        "transport_rate_per_km": 15.0,
-        "is_verified_real": True 
-    }
-    regional_options = [primary_mandi]
-    for i in range(1, len(commodity_data["markets"])):
-        m = commodity_data["markets"][i]
-        price = float(m["price"])
-        regional_options.append({
+    
+    # Map all markets and calculate REAL distance
+    mandi_options = []
+    for m in commodity_data["markets"]:
+        price = float(m.get("price", base_price))
+        m_lat = m.get("lat", 18.5204) # Fallback to Pune if missing
+        m_lng = m.get("lng", 73.8567)
+        
+        dist = calculate_haversine(user_loc.get("lat", 18.5204), user_loc.get("lng", 73.8567), m_lat, m_lng)
+        
+        mandi_options.append({
             "name": f"{m['name']} Mandi",
             "crop": crop,
             "current_price": round(price, 2),
-            "distance_km": random.uniform(20.0, 60.0),
-            "transport_rate_per_km": 15.0
+            "7_day_history": [round(price + random.uniform(-50, 50), 2) for _ in range(7)],
+            "current_volume_quintals": random.randint(100, 500),
+            "average_volume_quintals": 250,
+            "distance_km": round(dist, 1),
+            "transport_rate_per_km": 15.0,
+            "is_verified_real": True 
         })
-    return {"primary": primary_mandi, "regional_options": regional_options}
+    
+    # Sort by distance (nearest first)
+    mandi_options.sort(key=lambda x: x["distance_km"])
+    
+    return {
+        "primary": mandi_options[0], 
+        "regional_options": mandi_options
+    }
 
 def _parse_gov_api_data(records: List[Dict[str, Any]], crop: str) -> Dict[str, Any]:
     primary_record = records[0]

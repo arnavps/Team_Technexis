@@ -23,7 +23,7 @@ export function MandiTable({ mandis }: { mandis: Mandi[] }) {
                         <th scope="col" className="px-6 py-4">{t('mandi')}</th>
                         <th scope="col" className="px-6 py-4">{t('dist')}</th>
                         <th scope="col" className="px-6 py-4">{t('price')}</th>
-                        <th scope="col" className="px-6 py-4 font-bold text-mint">{t('netProfit')}</th>
+                        <th scope="col" className="px-6 py-4 font-bold text-mint">{t('estimatedTakeHome') || 'Net Take-Home'}</th>
                     </tr>
                 </thead>
                 <tbody>

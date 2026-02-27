@@ -13,6 +13,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { VerdictCard } from './VerdictCard';
 import { MetricsGrid } from './MetricsGrid';
 import { ManualOverrideModal } from '@/components/dashboard/ManualOverrideModal';
+import { VakeelBrief } from '@/components/dashboard/VakeelBrief';
 import { auth } from '@/services/firebase';
 
 export default function DashboardPage() {
@@ -24,6 +25,18 @@ export default function DashboardPage() {
     const [userCrop, setUserCrop] = useState('');
     const [vakeelQuery, setVakeelQuery] = useState('');
     const [yieldEst, setYieldEst] = useState(50);
+    const [isCropSelectorOpen, setIsCropSelectorOpen] = useState(false);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [manualLocation, setManualLocation] = useState<{ lat: number, lng: number } | null>(null);
+
+    const availableCrops = ["Tomato", "Potato", "Onion", "Soybean", "Wheat", "Cotton"];
+    const hubs = [
+        { name: "Nashik, MH", lat: 19.9975, lng: 73.7898 },
+        { name: "Pune, MH", lat: 18.5204, lng: 73.8567 },
+        { name: "Nagpur, MH", lat: 21.1458, lng: 79.0882 },
+        { name: "Indore, MP", lat: 22.7196, lng: 75.8577 },
+        { name: "Karnal, HR", lat: 29.6857, lng: 76.9907 }
+    ];
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -78,20 +91,34 @@ export default function DashboardPage() {
         }
 
         if (newOverrides[soilKey]) {
-            updated.weather.soil_moisture = newOverrides[soilKey];
+            updated.weather.soil_moisture_percent = newOverrides[soilKey];
             if (newOverrides[soilKey] > 70) {
                 updated.status = "YELLOW";
             }
         }
 
-        updated.is_manual_override = true;
-        updated.manual_override_count = Object.keys(newOverrides).length;
+        const priceKey = t('price') || 'Market Price';
 
-        // Update totals based on yield
-        const perQuintal = updated.net_realization_inr_per_quintal || (updated.total_net_profit / (updated.yield_quintals || 50));
+        if (newOverrides[priceKey]) {
+            updated.mandi_stats.current_price = newOverrides[priceKey];
+            const logisticsPerQ = (updated.breakdown?.logistics_cost || 0) / (updated.yield_quintals || activeYield);
+            const qualityLossPct = (updated.breakdown?.quality_loss_pct || 2) / 100;
+            const spoilagePerQ = newOverrides[priceKey] * qualityLossPct;
+            updated.net_realization_inr_per_quintal = newOverrides[priceKey] - logisticsPerQ - spoilagePerQ;
+        }
+
+        const perQuintal = updated.net_realization_inr_per_quintal || (updated.total_net_profit / (updated.yield_quintals || activeYield));
         updated.total_net_profit = Math.round(perQuintal * activeYield);
         updated.yield_quintals = activeYield;
 
+        if (updated.breakdown) {
+            updated.breakdown.gross_revenue = updated.mandi_stats.current_price * activeYield;
+            updated.breakdown.logistics_cost = (updated.breakdown.logistics_cost / (currentData.yield_quintals || 50)) * activeYield;
+            updated.breakdown.spoilage_penalty = (updated.breakdown.quality_loss_pct / 100) * updated.breakdown.gross_revenue;
+        }
+
+        updated.is_manual_override = true;
+        updated.manual_override_count = Object.keys(newOverrides).length;
         setData(updated);
     };
 
@@ -116,8 +143,8 @@ export default function DashboardPage() {
             }
 
             const payload = {
-                crop: userCrop || "", // Use saved profile crop, backend handles fallback if empty
-                location: { lat: 18.5204, lng: 73.8567 }, // Mock Pune
+                crop: userCrop || "",
+                location: manualLocation || (location ? { lat: location.latitude, lng: location.longitude } : { lat: 18.5204, lng: 73.8567 }), // Fallback to Pune if GPS denied
                 yield_est_quintals: yieldEst,
                 base_spoilage_rate: 0.05,
                 language: language
@@ -164,8 +191,14 @@ export default function DashboardPage() {
     };
 
     useEffect(() => {
+        if (!location) {
+            requestLocation();
+        }
+    }, [requestLocation, location]);
+
+    useEffect(() => {
         fetchRecommendation();
-    }, [isOnline, userCrop]);
+    }, [isOnline, userCrop, location]);
 
     if (loading) {
         return (
@@ -192,11 +225,15 @@ export default function DashboardPage() {
                 <div>
                     <div className="flex items-center space-x-3 mb-2">
                         <h1 className="text-2xl font-bold tracking-tight text-white uppercase tracking-tighter">Decision Hub</h1>
-                        {userCrop && (
-                            <span className="bg-mint text-forest text-[10px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest shadow-[0_0_10px_rgba(32,255,189,0.3)]">
-                                {userCrop}
+                        <button
+                            onClick={() => setIsCropSelectorOpen(true)}
+                            className="group flex items-center space-x-2 bg-mint/10 hover:bg-mint/20 border border-mint/30 px-2 py-0.5 rounded-full transition-all"
+                        >
+                            <span className="text-mint text-[10px] font-black uppercase tracking-widest">
+                                {userCrop || "Select Crop"}
                             </span>
-                        )}
+                            <svg className="w-3 h-3 text-mint opacity-50 group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        </button>
                     </div>
                     <div className="flex items-center space-x-3">
                         {!isOnline && (
@@ -206,14 +243,24 @@ export default function DashboardPage() {
                             </span>
                         )}
                         <p className="text-sm text-gray-400">{t('temporalArbitrageEngine')}</p>
-                        {lastFetched && (
-                            <div className="flex items-center space-x-1.5 ml-4 border-l border-white/10 pl-4 py-0.5">
+                        <div className="flex items-center space-x-3 ml-4 border-l border-white/10 pl-4 py-0.5">
+                            <button
+                                onClick={() => setIsLocationModalOpen(true)}
+                                className="group flex items-center space-x-1.5 bg-white/5 hover:bg-white/10 px-2 py-0.5 rounded-md border border-white/10 transition-all"
+                            >
+                                <svg className="w-3 h-3 text-mint group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest">
+                                    {manualLocation ? "Custom Fix" : location ? "Live GPS" : "Pune Hub"}
+                                </span>
+                            </button>
+
+                            <div className="flex items-center space-x-1.5 border-l border-white/10 pl-4">
                                 <span className="w-1.5 h-1.5 bg-mint rounded-full animate-pulse"></span>
                                 <span className="text-[10px] text-gray-500 uppercase tracking-widest font-medium">
-                                    Live Sync: {lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    Last Sync: {lastFetched ? lastFetched.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just Now"}
                                 </span>
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
                 <div className="flex space-x-3 items-center">
@@ -237,67 +284,72 @@ export default function DashboardPage() {
                 />
             )}
 
-            {/* Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* 2-Column Responsive Grid Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-10 gap-6">
 
-                {/* Left Column - The Verdict & Metrics */}
-                <div className="lg:col-span-1 space-y-6">
-
+                {/* Left Column (40% on Desktop) - The Verdict & Field Sensors */}
+                <div className="lg:col-span-4 space-y-6 flex flex-col">
                     {/* Main Verdict Card */}
                     <VerdictCard data={data} userCrop={userCrop} onExplain={(q: string) => setVakeelQuery(q)} />
 
-                    {/* 4-Item Environmental Metrics Grid */}
-                    <MetricsGrid
-                        data={data}
-                        onMetricClick={handleMetricClick}
-                        onExplain={(q: string) => setVakeelQuery(q)}
-                    />
+                    {/* Sensor Cards in 2x2 compact grid */}
+                    <div className="order-3 lg:order-2">
+                        <MetricsGrid
+                            data={data}
+                            onMetricClick={handleMetricClick}
+                            onExplain={(q: string) => setVakeelQuery(q)}
+                        />
+                    </div>
+                </div>
+
+                {/* Right Column (60% on Desktop) - Analytics & Calibration */}
+                <div className="lg:col-span-6 space-y-6 flex flex-col group">
+                    {/* Market Orbit - Desktop & Mobile Order Priority */}
+                    <div className="order-1 lg:order-1">
+                        <GlassCard className="h-full">
+                            <div className="flex justify-between items-center mb-6">
+                                <h3 className="text-lg font-bold text-white">{t('marketOrbit')}</h3>
+                                <StatusPill status="GREEN" message={t('liveData')} />
+                            </div>
+                            <p className="text-sm text-gray-400 mb-6">{t('mandiDesc')}</p>
+                            <MandiTable mandis={mandiList} />
+                        </GlassCard>
+                    </div>
 
                     {/* Yield Calibration Card */}
-                    <GlassCard className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Yield Calibration</h3>
-                            <span className="text-mint font-mono font-bold text-xl">{yieldEst} Qtl</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="1"
-                            max="500"
-                            step="1"
-                            value={yieldEst}
-                            onChange={(e) => {
-                                const val = parseInt(e.target.value);
-                                setYieldEst(val);
-                                recalculateWithOverrides(data, overrides, val);
-                            }}
-                            onMouseUp={() => fetchRecommendation()}
-                            onTouchEnd={() => fetchRecommendation()}
-                            className="w-full h-1.5 bg-mint/20 rounded-lg appearance-none cursor-pointer accent-mint mb-2"
-                        />
-                        <div className="flex justify-between text-[10px] text-gray-500 font-bold">
-                            <span>1 QTL</span>
-                            <span>TOTAL FIELD ESTIMATE</span>
-                            <span>500 QTL</span>
-                        </div>
-                        <p className="mt-4 text-[10px] text-gray-400 italic leading-relaxed">
-                            Adjust this slider to match your actual harvest volume. Total profit calculations will update instantly.
-                        </p>
-                    </GlassCard>
+                    <div className="order-2 lg:order-2">
+                        <GlassCard className="p-6">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Yield Calibration</h3>
+                                <span className="text-mint font-mono font-bold text-xl">{yieldEst} Qtl</span>
+                            </div>
+                            <input
+                                type="range"
+                                min="1"
+                                max="500"
+                                step="1"
+                                value={yieldEst}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    setYieldEst(val);
+                                    recalculateWithOverrides(data, overrides, val);
+                                }}
+                                onMouseUp={() => fetchRecommendation()}
+                                onTouchEnd={() => fetchRecommendation()}
+                                className="w-full h-1.5 bg-mint/20 rounded-lg appearance-none cursor-pointer accent-mint mb-2"
+                            />
+                            <div className="flex justify-between text-[10px] text-gray-500 font-bold">
+                                <span>1 QTL</span>
+                                <span>TOTAL FIELD ESTIMATE</span>
+                                <span>500 QTL</span>
+                            </div>
+                        </GlassCard>
+                    </div>
                 </div>
-
-                {/* Right Column - Deep Analytics */}
-                <div className="lg:col-span-2 space-y-6">
-                    <GlassCard>
-                        <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white">{t('marketOrbit')}</h3>
-                            <StatusPill status="GREEN" message={t('liveData')} />
-                        </div>
-                        <p className="text-sm text-gray-400 mb-6">{t('mandiDesc')}</p>
-                        <MandiTable mandis={mandiList} />
-                    </GlassCard>
-                </div>
-
             </div>
+
+            {/* AI Contextual Summary (Vakeel Brief) */}
+            <VakeelBrief brief={data?.vakeel_brief} />
 
             {/* Floating Voice Assistant */}
             <VoiceAssistant dashboardData={data} initialQuery={vakeelQuery} />
@@ -311,6 +363,91 @@ export default function DashboardPage() {
                 unit={modalConfig.unit}
                 onSave={handleSaveOverride}
             />
+            {/* Crop Selector Modal */}
+            {isCropSelectorOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+                    <GlassCard className="max-w-md w-full p-8 shadow-2xl border-mint/20">
+                        <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+                            <svg className="w-6 h-6 text-mint mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                            Correction: Select Active Crop
+                        </h3>
+                        <div className="grid grid-cols-2 gap-3 mb-8">
+                            {availableCrops.map(crop => (
+                                <button
+                                    key={crop}
+                                    onClick={() => {
+                                        setUserCrop(crop);
+                                        setIsCropSelectorOpen(false);
+                                    }}
+                                    className={`p-4 rounded-xl border text-sm font-bold transition-all ${userCrop === crop
+                                        ? 'bg-mint text-forest border-mint shadow-[0_0_15px_rgba(32,255,189,0.3)]'
+                                        : 'bg-white/5 text-white border-white/10 hover:border-mint/50'}`}
+                                >
+                                    {crop}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            onClick={() => setIsCropSelectorOpen(false)}
+                            className="w-full py-3 text-sm text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </GlassCard>
+                </div>
+            )}
+            {/* Location Correction Modal */}
+            {isLocationModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in zoom-in duration-200">
+                    <GlassCard className="max-w-md w-full p-8 shadow-2xl border-white/10">
+                        <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                            <svg className="w-6 h-6 text-mint mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                            Correction: Field Location
+                        </h3>
+                        <p className="text-xs text-gray-400 mb-6 leading-relaxed">If your GPS signal is weak in the field, select a nearby agricultural hub or use your saved coordinates for accurate transit math.</p>
+
+                        <div className="space-y-3 mb-8">
+                            <button
+                                onClick={() => {
+                                    setManualLocation(null);
+                                    requestLocation();
+                                    setIsLocationModalOpen(false);
+                                }}
+                                className="w-full flex items-center justify-between p-4 rounded-xl border border-mint/30 bg-mint/5 hover:bg-mint/10 transition-all group"
+                            >
+                                <div className="text-left">
+                                    <p className="text-sm font-bold text-mint uppercase tracking-widest">Use Live GPS</p>
+                                    <p className="text-[10px] text-mint/60">Auto-detect from device</p>
+                                </div>
+                                <svg className="w-5 h-5 text-mint animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" /></svg>
+                            </button>
+
+                            <div className="grid grid-cols-2 gap-2">
+                                {hubs.map(hub => (
+                                    <button
+                                        key={hub.name}
+                                        onClick={() => {
+                                            setManualLocation({ lat: hub.lat, lng: hub.lng });
+                                            setIsLocationModalOpen(false);
+                                            fetchRecommendation();
+                                        }}
+                                        className="p-3 rounded-lg border border-white/10 bg-white/5 hover:border-mint/50 hover:bg-white/10 text-[10px] font-black text-gray-400 hover:text-white uppercase tracking-widest transition-all"
+                                    >
+                                        {hub.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => setIsLocationModalOpen(false)}
+                            className="w-full py-3 text-sm text-gray-500 font-bold uppercase tracking-widest hover:text-white transition-colors"
+                        >
+                            Back to Hub
+                        </button>
+                    </GlassCard>
+                </div>
+            )}
         </div>
     );
 }
