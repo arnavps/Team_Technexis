@@ -33,9 +33,9 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        // Force IPv4 loopback on stable port 8080 to avoid Node.js IPv6 ECONNREFUSED bugs
+        // Force IPv4 loopback on stable port 8000 to avoid Node.js IPv6 ECONNREFUSED bugs
         source: '/api/:path*',
-        destination: 'http://127.0.0.1:8080/:path*',
+        destination: 'http://127.0.0.1:8000/:path*',
       },
     ];
   },

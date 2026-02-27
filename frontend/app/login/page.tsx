@@ -47,7 +47,7 @@ export default function LoginPage() {
         }
 
         // --- DEVELOPER BYPASS ---
-        if (phone === '9999999999') {
+        if (phone === '9999999999' || phone === '9869530800') {
             setStep('OTP');
             setLoading(false);
             return;
@@ -79,7 +79,7 @@ export default function LoginPage() {
         setLoading(true);
         setError('');
 
-        if (!confirmationResult && phone !== '9999999999') {
+        if (!confirmationResult && phone !== '9999999999' && phone !== '9869530800') {
             setError(t('sessionExpired'));
             setStep('PHONE');
             setLoading(false);
@@ -88,8 +88,9 @@ export default function LoginPage() {
 
         try {
             // --- DEVELOPER BYPASS ---
-            if (phone === '9999999999') {
+            if (phone === '9999999999' || phone === '9869530800') {
                 if (otp === '123456') {
+                    localStorage.setItem('demo_phone', phone);
                     router.push('/dashboard');
                     return;
                 } else {

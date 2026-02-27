@@ -66,6 +66,50 @@
                 }
             ]
         },
+        "potato": {
+            "modal_price": 2550.0,
+            "min_price": 1800.0,
+            "max_price": 3200.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Agra",
+                    "price": 2400.0,
+                    "lat": 27.1767,
+                    "lng": 78.0081
+                },
+                {
+                    "name": "Farrukhabad",
+                    "price": 2350.0,
+                    "lat": 27.3820,
+                    "lng": 79.5857
+                },
+                {
+                    "name": "Indore",
+                    "price": 2600.0,
+                    "lat": 22.7196,
+                    "lng": 75.8577
+                },
+                {
+                    "name": "Pune",
+                    "price": 2650.0,
+                    "lat": 18.5204,
+                    "lng": 73.8567
+                },
+                {
+                    "name": "Nagpur",
+                    "price": 2580.0,
+                    "lat": 21.1458,
+                    "lng": 79.0882
+                },
+                {
+                    "name": "Nashik",
+                    "price": 2680.0,
+                    "lat": 19.9975,
+                    "lng": 73.7898
+                }
+            ]
+        },
         "onion": {
             "modal_price": 1200.0,
             "min_price": 1000.0,
@@ -95,6 +139,44 @@
                     "price": 2400.0,
                     "lat": 28.7159,
                     "lng": 77.1750
+                }
+            ]
+        },
+        "soybean": {
+            "modal_price": 4720.0,
+            "min_price": 4300.0,
+            "max_price": 5050.0,
+            "unit": "INR/Quintal",
+            "markets": [
+                {
+                    "name": "Indore",
+                    "price": 4900.0,
+                    "lat": 22.7196,
+                    "lng": 75.8577
+                },
+                {
+                    "name": "Ujjain",
+                    "price": 4750.0,
+                    "lat": 23.1793,
+                    "lng": 75.7849
+                },
+                {
+                    "name": "Latur",
+                    "price": 5050.0,
+                    "lat": 18.4088,
+                    "lng": 76.5604
+                },
+                {
+                    "name": "Hingoli",
+                    "price": 4850.0,
+                    "lat": 19.7163,
+                    "lng": 77.1437
+                },
+                {
+                    "name": "Nagpur",
+                    "price": 4600.0,
+                    "lat": 21.1458,
+                    "lng": 79.0882
                 }
             ]
         },

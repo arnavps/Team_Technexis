@@ -41,7 +41,7 @@ export default function DashboardPage() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const phone = auth.currentUser?.phoneNumber || "9999999999";
+                const phone = auth.currentUser?.phoneNumber || localStorage.getItem('demo_phone') || "9999999999";
                 import('@/utils/supabase/client').then(async ({ supabase }) => {
                     import('@/services/firebase').then(async ({ auth }) => {
                         const { data } = await supabase

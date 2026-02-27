@@ -147,7 +147,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-glass-border py-12 text-center text-sm text-gray-500">
-        <p>© 2026 MittiMitra. Built for Indian smallholder farmers.</p>
+        <p>© 2026 MittiMitra (KrishiAI) by Team Technexis. Built for Indian smallholder farmers.</p>
       </footer>
     </div>
   );
