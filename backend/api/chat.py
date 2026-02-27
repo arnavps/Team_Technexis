@@ -33,6 +33,9 @@ class OnboardingExtractRequest(BaseModel):
     current_name: str = ""
     current_crop: str = ""
     current_land_size: float = 0.0
+    consent_granted: Any = None
+    location_available: bool = False
+    gps_error: Any = None
 
 def build_system_prompt(context: Dict[str, Any], language: str) -> str:
     """
@@ -187,7 +190,14 @@ EXTRACT CONSENT:
         elif req.step == "CropDetails":
             schema_instructions = """Return JSON with: {'name': string/null, 'crop': string/null, 'land_size': number/null, 'ai_reply': 'string'}.
 - Extract person's name, crop name, and land size (acres).
-- Map regional crop names (e.g. 'Kanda', 'Batata', 'Soyabin') to English equivalents ('Onion', 'Potato', 'Soybean').
+- Map regional crop names to English equivalents:
+  - 'Kanda' -> 'onion'
+  - 'Batata' -> 'potato'
+  - 'Soyabin'/'Soybean' -> 'soybean'
+  - 'Kapus'/'Kapaas' -> 'cotton'
+  - 'Gahu'/'Gehun' -> 'wheat'
+  - 'Tandul'/'Chawal' -> 'rice'
+  - 'Tamatar' -> 'tomato'
 - 'ai_reply' MUST be in """ + req.language + """ script.
 - If you have some info but not all (e.g. you have 5 acres but no crop), the 'ai_reply' MUST acknowledge the 5 acres and specifically ask for the missing crop."""
         elif req.step == "FinalCalibration":
@@ -201,18 +211,19 @@ CONTEXT OF ALREADY EXTRACTED DATA:
 - Name: {req.current_name or 'Unknown'}
 - Crop: {req.current_crop or 'Unknown'}
 - Land Size: {req.current_land_size or 'Unknown'} acres
+- Consent: {req.consent_granted}
 
 Current Step: {req.step}
 Farmer Language: {req.language}
 
 {schema_instructions}
 
-RULES:
-1. Return ONLY valid JSON. No preamble, no conversational filler on the outside.
+STRICT RULES:
+1. Return ONLY valid JSON.
 2. The 'ai_reply' MUST be in {req.language} script.
-3. Be EXTREMELY BRIEF in 'ai_reply' (max 10 words).
-4. If a field like 'crop' or 'land_size' is already known from CONTEXT, do NOT ask for it again. Focus on the missing info.
-5. Do NOT say "I am a farm assistant" or similar placeholders.
+3. If a field (Name, Crop, or Land Size) is NOT 'Unknown' in the CONTEXT above, you MUST NOT ask for it again.
+4. If BOTH Crop AND Land Size are known, your 'ai_reply' should just be a very brief success message like "Thank you, I have all your details." (in {req.language}).
+5. do NOT use conversational filler like "Ji Kisan bhai" unless it's part of a brief acknowledgement.
 """
         # Safer logging for Windows terminals
         try:

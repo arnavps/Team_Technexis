@@ -201,5 +201,7 @@ export const mr = {
     gpsWeakDesc: "तुमचे GPS कमकुवत असल्यास, अचूक गणितासाठी जवळचे हब निवडा किंवा सेव्ह केलेले को-ऑर्डिनेट्स वापरा.",
     useLiveGps: "Live GPS वापरा",
     autoDetectDevice: "डिव्हाइसवरून ओळखा",
-    backToHub: "हबवर परत जा"
+    backToHub: "हबवर परत जा",
+    calculating: "वकील गणना करत आहे...",
+    computing: "अति-स्थानिक निव्वळ वसुलीची गणना करत आहे"
 };

@@ -201,5 +201,7 @@ export const gu = {
     gpsWeakDesc: "જો તમારું GPS નબળું હોય, તો નજીકના હબ પસંદ કરો અથવા ચોક્કસ ગણતરી માટે સાચવેલ કોઓર્ડિનેટ્સ વાપરો.",
     useLiveGps: "Live GPS વાપરો",
     autoDetectDevice: "ઉપકરણમાંથી શોધો",
-    backToHub: "હબ પર પાછા ફરો"
+    backToHub: "હબ પર પાછા ફરો",
+    calculating: "વકીલ ગણતરી કરી રહ્યો છે...",
+    computing: "અતિ-સ્થાનિક ચોખ્ખી વસૂલાતની ગણતરી થઈ રહી છે"
 };

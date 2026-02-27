@@ -11,7 +11,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const { setLanguage, language: globalLanguage, n } = useLanguage();
+    const { setLanguage, language: globalLanguage, t, n } = useLanguage();
     const { location, error: gpsError, requestLocation } = useGPS();
 
     // Onboarding State Machine
@@ -39,7 +39,12 @@ export default function OnboardingPage() {
         _setConsentGranted(b);
     };
 
-    const [name, setName] = useState("");
+    const [name, _setName] = useState("");
+    const nameRef = useRef("");
+    const setName = (val: string) => {
+        nameRef.current = val;
+        _setName(val);
+    };
 
     const [crop, _setCrop] = useState("");
     const cropRef = useRef("");
@@ -55,8 +60,19 @@ export default function OnboardingPage() {
         _setLandSize(val);
     };
 
-    const [yieldQuintals, setYieldQuintals] = useState<number | null>(null);
-    const [plantingDate, setPlantingDate] = useState("");
+    const [yieldQuintals, _setYieldQuintals] = useState<number | null>(null);
+    const yieldQuintalsRef = useRef<number | null>(null);
+    const setYieldQuintals = (val: number | null) => {
+        yieldQuintalsRef.current = val;
+        _setYieldQuintals(val);
+    };
+
+    const [plantingDate, _setPlantingDate] = useState("");
+    const plantingDateRef = useRef("");
+    const setPlantingDate = (val: string) => {
+        plantingDateRef.current = val;
+        _setPlantingDate(val);
+    };
 
     // Conversational UI States
     const [isListening, setIsListening] = useState(false);
@@ -250,63 +266,77 @@ export default function OnboardingPage() {
                     step: activeStep,
                     text_input: text,
                     language: activeLang,
-                    current_name: name,
-                    current_crop: crop,
-                    current_land_size: landSize || 0,
-                    consent_granted: consentGranted, // Pass context
-                    location_available: !!location, // Pass context
-                    gps_error: gpsError // Pass context
+                    current_name: nameRef.current || name,
+                    current_crop: cropRef.current || crop,
+                    current_land_size: landSizeRef.current || landSize || 0,
+                    consent_granted: (typeof consentGranted === 'boolean') ? consentGranted : consentGrantedRef.current,
+                    location_available: !!location,
+                    gps_error: gpsError
                 })
             });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.detail || "API Extraction failed");
+            }
+
             const data = await res.json();
             console.log(`[Onboarding] AI Data Received:`, data);
-
-            if (data.ai_reply) {
-                setAiReply(data.ai_reply);
-                speakResponse(data.ai_reply, activeLang, () => {
-                    if (currentStepRef.current !== 'Verdict') startRecognitionInternal();
-                });
-            }
 
             // Stateful Auto-Transitions
             const isConsentTrue = data.consent_granted === true || String(data.consent_granted).toLowerCase() === 'true';
 
-            if (activeStep === 'Consent' && isConsentTrue) {
-                setConsentGranted(true);
-                setTimeout(() => setCurrentStep('CropDetails'), 1000);
-            }
-            else if (activeStep === 'CropDetails') {
-                if (data.name) setName(data.name);
-                if (data.crop) setCrop(data.crop);
-                if (data.land_size) setLandSize(parseFloat(String(data.land_size)));
-
-                // SYNC CHECK: Use Refs to check for simultaneous completion
-                const finalCrop = cropRef.current;
-                const finalSize = landSizeRef.current;
-
-                if (finalCrop && finalSize) {
-                    console.log(`[Onboarding] LOCK: Crop=${finalCrop}, Size=${finalSize}. Advancing Step.`);
-                    setCurrentStep('Location');
-                    // Stop further execution for this turn to avoid stale ai_reply processing
-                    setIsThinking(false);
-                    return;
+            // Function to handle step transition AFTER speech
+            const finishTurn = (nextStep?: Step) => {
+                if (nextStep) {
+                    setTimeout(() => setCurrentStep(nextStep), 500);
+                } else if (currentStepRef.current !== 'Verdict') {
+                    startRecognitionInternal();
                 }
-            }
-            else if (activeStep === 'Location') {
-                // If AI replies while waiting for GPS
-            }
-            else if (activeStep === 'FinalCalibration') {
-                if (data.yield_quintals) setYieldQuintals(parseFloat(String(data.yield_quintals)));
-                if (data.planting_date) setPlantingDate(data.planting_date);
+                setIsThinking(false);
+            };
 
-                if (data.yield_quintals || yieldQuintals) {
-                    setTimeout(() => setCurrentStep('Verdict'), 1500);
+            if (data.ai_reply) {
+                setAiReply(data.ai_reply);
+
+                // Prepare context for post-speech transition
+                let targetStep: Step | undefined = undefined;
+                if (activeStep === 'Consent' && isConsentTrue) {
+                    setConsentGranted(true);
+                    targetStep = 'CropDetails';
+                } else if (activeStep === 'CropDetails') {
+                    if (data.name) setName(data.name);
+                    if (data.crop) setCrop(data.crop);
+                    if (data.land_size) setLandSize(parseFloat(String(data.land_size)));
+
+                    if ((data.crop || cropRef.current) && (data.land_size || landSizeRef.current)) {
+                        targetStep = 'Location';
+                    }
+                } else if (activeStep === 'FinalCalibration') {
+                    if (data.yield_quintals) setYieldQuintals(parseFloat(String(data.yield_quintals)));
+                    if (data.planting_date) setPlantingDate(data.planting_date);
+
+                    if (data.yield_quintals || yieldQuintalsRef.current) {
+                        targetStep = 'Verdict';
+                    }
                 }
+
+                speakResponse(data.ai_reply, activeLang, () => finishTurn(targetStep));
+            } else {
+                // If no ai_reply, transition immediately if criteria met
+                let targetStep: Step | undefined = undefined;
+                if (activeStep === 'Consent' && isConsentTrue) {
+                    setConsentGranted(true);
+                    targetStep = 'CropDetails';
+                } else if (activeStep === 'CropDetails' && cropRef.current && landSizeRef.current) {
+                    targetStep = 'Location';
+                }
+                finishTurn(targetStep);
             }
 
         } catch (error) {
             console.error("Extraction error", error);
-        } finally {
+            setAiReply("I'm sorry, I'm having trouble connecting to the decision engine. Let's try again.");
             setIsThinking(false);
         }
     };
@@ -314,20 +344,24 @@ export default function OnboardingPage() {
     // GPS Transition Logic
     useEffect(() => {
         if (currentStep === 'Location') {
-            if (!location) {
-                const promptText = langStr === "Marathi" ? "तुमची लोकेशन शोधत आहे. कृपया परवानगी द्या." : langStr === "Hindi" ? "हम आपकी लोकेशन खोज रहे हैं। कृपया अनुमति दें।" : "I'm locking your coordinates. Please allow GPS access.";
-                setAiReply(promptText);
-                speakResponse(promptText, langStr, () => {
-                    requestLocation();
-                });
-            } else {
-                const successMsg = langStr === "Marathi" ? "लोकेशन मिळाली आहे. आता अपेक्षित उत्पन्न सांगा." : langStr === "Hindi" ? "लोकेशन मिल गई है। अब अपेक्षित पैदावार बताएं।" : "Coordinates secured. Lastly, what is your expected yield?";
-                setAiReply(successMsg);
-                speakResponse(successMsg, langStr, () => {
-                    setCurrentStep('FinalCalibration');
-                    startRecognitionInternal();
-                });
-            }
+            const handleGpsTransition = async () => {
+                if (!location) {
+                    const promptText = langStr === "Marathi" ? "तुमची लोकेशन शोधत आहे. कृपया परवानगी द्या." : langStr === "Hindi" ? "हम आपकी लोकेशन खोज रहे हैं। कृपया अनुमति दें।" : "I'm locking your coordinates. Please allow GPS access.";
+                    setAiReply(promptText);
+                    speakResponse(promptText, langStr, () => {
+                        requestLocation();
+                    });
+                } else {
+                    const successMsg = langStr === "Marathi" ? "लोकेशन मिळाली आहे. आता अपेक्षित उत्पन्न सांगा." : langStr === "Hindi" ? "लोकेशन मिल गई है। अब अपेक्षित पैदावार बताएं।" : "Coordinates secured. Lastly, what is your expected yield?";
+                    setAiReply(successMsg);
+                    speakResponse(successMsg, langStr, () => {
+                        setCurrentStep('FinalCalibration');
+                        startRecognitionInternal();
+                    });
+                }
+            };
+            const timer = setTimeout(handleGpsTransition, 1000); // 1s delay to protect audio continuity
+            return () => clearTimeout(timer);
         }
     }, [currentStep, location, langStr]);
 
@@ -335,8 +369,8 @@ export default function OnboardingPage() {
     useEffect(() => {
         const finalize = async () => {
             if (currentStep === 'Verdict') {
-                const promptText = "Vakeel is calculating your Net Realization...";
-                speakResponse(promptText, "English"); // Fallback
+                const promptText = t('calculating');
+                speakResponse(promptText, langStr);
                 try {
                     const phone = auth.currentUser?.phoneNumber || localStorage.getItem('demo_phone') || "9999999999";
                     const fuzzed = fuzzLocation(location?.latitude || 0, location?.longitude || 0);
@@ -526,8 +560,8 @@ export default function OnboardingPage() {
                             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </div>
                     </div>
-                    <h2 className="text-2xl text-white font-bold tracking-wider mb-2">Vakeel is calculating...</h2>
-                    <p className="text-mint font-mono uppercase text-sm tracking-widest animate-pulse">Computing hyper-local Net Realization</p>
+                    <h2 className="text-2xl text-white font-bold tracking-wider mb-2">{t('calculating')}</h2>
+                    <p className="text-mint font-mono uppercase text-sm tracking-widest animate-pulse">{t('computing')}</p>
                 </div>
             )}
 

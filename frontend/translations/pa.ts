@@ -201,5 +201,7 @@ export const pa = {
     gpsWeakDesc: "ਜੇਕਰ ਤੁਹਾਡਾ GPS ਸਿਗਨਲ ਕਮਜ਼ੋਰ ਹੈ, ਤਾਂ ਨਜ਼ਦੀਕੀ ਹੱਬ ਚੁਣੋ ਜਾਂ ਸਹੀ ਗਣਨਾ ਲਈ ਸੁਰੱਖਿਅਤ ਕੀਤੇ ਕੋਆਰਡੀਨੇਟਸ ਵਰਤੋ।",
     useLiveGps: "Live GPS ਵਰਤੋ",
     autoDetectDevice: "ਡਿਵਾਈਸ ਤੋਂ ਪਛਾਣੋ",
-    backToHub: "ਹੱਬ 'ਤੇ ਵਾਪਸ ਜਾਓ"
+    backToHub: "ਹੱਬ 'ਤੇ ਵਾਪਸ ਜਾਓ",
+    calculating: "ਵਕੀਲ ਗਣਨਾ ਕਰ ਰਿਹਾ ਹੈ...",
+    computing: "ਅਤਿ-ਸਥਾਨਕ ਸ਼ੁੱਧ ਵਸੂਲੀ ਦੀ ਗਣਨਾ ਹੋ ਰਹੀ ਹੈ"
 };

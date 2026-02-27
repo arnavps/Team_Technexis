@@ -201,5 +201,7 @@ export const en = {
     gpsWeakDesc: "If your GPS signal is weak in the field, select a nearby agricultural hub or use your saved coordinates for accurate transit math.",
     useLiveGps: "Use Live GPS",
     autoDetectDevice: "Auto-detect from device",
-    backToHub: "Back to Hub"
+    backToHub: "Back to Hub",
+    calculating: "Vakeel is calculating...",
+    computing: "Computing hyper-local Net Realization"
 };

@@ -21,62 +21,63 @@ def calculate_haversine(lat1, lon1, lat2, lon2):
 
 async def fetch_mandi_prices(crop: str, location: dict, language: str = "en") -> Dict[str, Any]:
     """
-    Attempts to fetch real-time e-NAM API data via UMANG.
-    If the government API is down, rate-limited, or the token is expired (e.g. 301/401),
-    gracefully falls back to the local predictive heuristic engine to ensure 100% uptime.
+    Priority-based Mandi Data Engine:
+    1. Local Verified JSON (Optimized for MH/MP crops)
+    2. UMANG e-NAM (Live govt data)
+    3. data.gov.in (Official historical aggregates)
+    4. Mock Heuristic (Zero-failure fallback)
     """
     
-    # Force resolution of default crops for consistent lookup across all layers
-    if not crop or crop.lower() in ["tomato", "default", ""]:
+    # Normalize crop name
+    crop_input = crop.strip().lower() if crop else "tomato"
+    
+    # Map defaults if ambiguous
+    if crop_input in ["tomato", "pika", "pika name", "crop", "default", ""]:
         lang_defaults = {
-            "te": "Cotton",
-            "ta": "Rice",
-            "gu": "Groundnut",
-            "pa": "Wheat",
-            "mr": "Sugarcane",
-            "hi": "Mustard",
-            "en": "Tomato"
+            "te": "cotton", "ta": "rice", "gu": "groundnut",
+            "pa": "wheat", "mr": "soybean", "hi": "mustard", "en": "tomato"
         }
-        crop = lang_defaults.get(language, "Tomato")
+        crop_input = lang_defaults.get(language, "tomato")
 
-    # 1. ATTEMPT REAL UMANG e-NAM DATA FETCH
+    # 1. PRIORITIZE VERIFIED LOCAL DATA (Best coordinates for MH/MP)
+    try:
+        json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "mandi_prices_real.json")
+        if os.path.exists(json_path):
+            with open(json_path, "r") as f:
+                real_db = json.load(f)
+                
+            commodities = real_db.get("commodities", {})
+            if crop_input in commodities:
+                logger.info(f"Verified Match Found: {crop_input}")
+                return _parse_real_json_data(commodities[crop_input], crop_input, location)
+    except Exception as e:
+        logger.error(f"Verified JSON lookup failed: {e}")
+
+    # 2. ATTEMPT LIVE UMANG e-NAM DATA
     try:
         enam_data = await enam_client.get_agm_gps_min_max_model_price()
+        if enam_data and "error" not in enam_data and len(enam_data.get("records", [])) > 0:
+             # If real production token worked and has records
+             return _parse_gov_api_data(enam_data["records"], crop_input)
     except Exception as e:
-        logger.error(f"ENAM Client await failed: {e}")
-        enam_data = {"error": str(e)}
-    
-    # Check if the API call succeeded and returned real JSON data
-    if not enam_data or "error" in enam_data:
-        # 2. ATTEMPT REAL JSON INJECTION (From Search Snippets / Scraper)
-        try:
-            json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data", "mandi_prices_real.json")
-            if os.path.exists(json_path):
-                with open(json_path, "r") as f:
-                    real_data = json.load(f)
-                    
-                commodity_key = crop.lower()
-                if commodity_key in real_data.get("commodities", {}):
-                    return _parse_real_json_data(real_data["commodities"][commodity_key], crop, location)
-        except Exception as e:
-            logger.error(f"Failed to inject real JSON data: {e}")
+        logger.error(f"UMANG API failed: {e}")
 
-        # 3. ATTEMPT OPEN GOVT DATA API (data.gov.in)
-        try:
-            crop_query = crop.capitalize()
-            # Increased limit to 50 for better discovery
-            open_api_url = f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd0000018f6d2aeef8304ec27142be2cf3ef3688&format=json&limit=50&filters[commodity]={quote(crop_query.upper())}"
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                res = await client.get(open_api_url)
-                if res.status_code == 200:
-                    data = res.json()
-                    if "records" in data and len(data["records"]) > 0:
-                        return _parse_gov_api_data(data["records"], crop_query)
-        except Exception:
-            pass
+    # 3. ATTEMPT OPEN GOVT DATA API (data.gov.in)
+    try:
+        crop_query = crop_input.capitalize()
+        open_api_url = f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070?api-key=579b464db66ec23bdd0000018f6d2aeef8304ec27142be2cf3ef3688&format=json&limit=50&filters[commodity]={quote(crop_query.upper())}"
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            res = await client.get(open_api_url)
+            if res.status_code == 200:
+                data = res.json()
+                if "records" in data and len(data["records"]) > 0:
+                    return _parse_gov_api_data(data["records"], crop_query)
+    except Exception:
+        pass
             
     # 4. FINAL FALLBACK: Heuristic Engine
-    return _generate_mock_fallback(crop, language)
+    logger.warning(f"No real data for {crop_input}. Falling back to mocks.")
+    return _generate_mock_fallback(crop_input, language)
 
 def _parse_real_json_data(commodity_data: Dict[str, Any], crop: str, user_loc: dict) -> Dict[str, Any]:
     # user_loc is {"lat": ..., "lng": ...}
