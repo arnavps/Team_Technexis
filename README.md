@@ -44,9 +44,11 @@ Farmers often sell in distress because they lack predictive visibility into mark
 ## ✨ Key Features (Fully Implemented)
 1. **The Net Realization Algorithm**: Calculates profit by deducting real-time transport costs and a dynamically scaled "Spoilage Penalty" based on IMD temperature/humidity data.
 2. **Black Swan Shock Analyzer**: Uses Z-Score volatility mapping on a 7-day rolling average to detect sudden price crashes and triggers an emergency "Pivot Advice" banner (e.g., redirect to cold storage).
-3. **Multilingual Voice AI (Groq + Llama 3)**: A floating voice assistant that parses the complex dashboard data and explains the "Sell vs. Wait" trade-offs in empathetic Hindi or Marathi via the Web Speech API.
-4. **Offline-First PWA Resilience**: Uses `next-pwa` Service Workers and robust `localStorage` caching to ensure the dashboard and the last AI advice remain accessible even when the farmer loses cellular signal mid-transit.
-5. **Glassmorphic UI Engine**: A heavily polished, dark-mode forest aesthetics engine that runs smoothly on low-end devices with CSS fallbacks for older Androids.
+3. **Multilingual Voice AI (Groq + Llama 3)**:
+   - **Conversational Onboarding**: A 5-step AI-guided registration flow (Language, Consent, CropDetails, Location, FinalCalibration).
+   - **The Agri-Vakeel**: A floating voice assistant that parses the dashboard data and explains trade-offs in 7 regional languages (English, Hindi, Marathi, Telugu, Tamil, Gujarati, Punjabi).
+4. **Real-Data Mandi Engine**: Prioritizes verified local data for Precise Coordinate Mapping (Nashik, Nagpur, Amravati).
+5. **Offline-First PWA Resilience**: Uses Service Workers and `localStorage` to ensure access mid-transit without internet.
 
 ---
 
@@ -68,7 +70,7 @@ Farmers often sell in distress because they lack predictive visibility into mark
 ---
 
 ## 📂 Project Structure
-For a detailed breakdown of the internal files, see the `design_structure.md` and `todo.md` tracking files within the codebase.
+For a detailed breakdown of the internal files and their purposes, see [file_structure.md](./file_structure.md).
 
 ---
 
@@ -95,11 +97,19 @@ For a detailed breakdown of the internal files, see the `design_structure.md` an
    ```
    *Note: Ensure Firebase config is populated in `frontend/services/firebase.ts`*
    ```bash
+   # Standard mode
    npm run dev
+   
+   # Mobile/HTTPS mode (Recommended for GPS/Mic testing)
+   npm run dev-https
    ```
 
-4. **View Application**
-   Open [http://localhost:3000](http://localhost:3000) for the Landing Page, or [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to view the Decision Hub.
+4. **Mobile Access (LAN Testing)**
+   To test GPS and Microphone on your phone:
+   - Run `npm run dev-https`.
+   - Find your LAN IP (e.g., `10.17.16.23`).
+   - Open `https://your-ip:3000` on your phone browser.
+   - Accept the self-signed certificate to proceed.
 
 ---
 
